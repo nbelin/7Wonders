@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <QStringList>
+
 Action::Action() : type(noAction), card(CardIdInvalid), status(awaitingValidation) {
 
 }
@@ -67,7 +69,7 @@ QString ActionTypeToString(ActionType actionType) {
 
 
 ActionType ActionTypeFromString(const QString & str) {
-    ActionType actionType;
+    ActionType actionType = noAction;
     if (str == "N") {
         actionType = noAction;
     } else if (str == "P") {
