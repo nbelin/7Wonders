@@ -173,21 +173,7 @@ int BoardView::countGuildPoints(PlayerId playerId) {
 
 int BoardView::countSciencePoints(PlayerId playerId) {
     const PlayerView & player = getPlayer(playerId);
-    QVector<ScienceType> listSciences;
-    for (CardId cardId : player.playedCards) {
-        const Card & card = AllCards::getCard(cardId);
-        if (card.science != ScienceNo) {
-            listSciences.append(card.science);
-        }
-    }
-    QVector<CardId> buildStages = AllWonders::getWonder(player.wonderId).getStages(player.wonderFace);
-    buildStages.resize(player.wonderStages.size());
-    for (CardId cardId : buildStages) {
-        const Card & card = AllCards::getCard(cardId);
-        if (card.science != ScienceNo) {
-            listSciences.append(card.science);
-        }
-    }
+    QVector<ScienceType> listSciences = player.getSciences();
     return utilCountSciencePoints(listSciences);
 }
 

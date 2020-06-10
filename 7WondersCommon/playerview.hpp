@@ -17,6 +17,8 @@ struct PlayerView {
     QString toString() const;
     void fromString(const QString & str);
 
+    QVector<ScienceType> getSciences() const;
+
     PlayerId id;
     QString name;
     WonderId wonderId;

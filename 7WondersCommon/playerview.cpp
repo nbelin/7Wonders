@@ -74,3 +74,22 @@ void PlayerView::fromString(const QString & str) {
     }
 }
 
+
+QVector<ScienceType> PlayerView::getSciences() const {
+    QVector<ScienceType> listSciences;
+    for (CardId cardId : playedCards) {
+        const Card & card = AllCards::getCard(cardId);
+        if (card.science != ScienceNo) {
+            listSciences.append(card.science);
+        }
+    }
+    QVector<CardId> buildStages = AllWonders::getWonder(wonderId).getStages(wonderFace);
+    buildStages.resize(wonderStages.size());
+    for (CardId cardId : buildStages) {
+        const Card & card = AllCards::getCard(cardId);
+        if (card.science != ScienceNo) {
+            listSciences.append(card.science);
+        }
+    }
+    return listSciences;
+}

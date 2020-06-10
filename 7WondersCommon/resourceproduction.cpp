@@ -73,17 +73,17 @@ double ResourceProduction::evaluateScore() const {
         if (i >= Resource::IdGlass) {
             // simple case, only 1 ResourceManufactured is enough!
             if (minProd > 0) {
-                score += 8;
+                score += 7;
             }
         } else {
             if (minProd > 0) {
-                score += 9;
+                score += 8;
             }
             if (minProd > 1) {
-                score += 6;
+                score += 4;
             }
             if (minProd > 2) {
-                score += 3;
+                score += 2;
             }
         }
     }

@@ -29,7 +29,7 @@ enum StatusPlayer : int;
  *
  *
  * left player = playerPosId + 1 % total
- * right player = playerPosId - 1 % total
+ * right player = playerPosId - 1 % total (warning: + total)
  *
  ****************************************/
 

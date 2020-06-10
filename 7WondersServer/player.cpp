@@ -115,14 +115,30 @@ double Player::evaluateScore() {
     }
 
 
-    if (board->isLastAge()) {
+    double futureScienceCoef = 0.0;
+    switch (board->currentAge) {
+    case 1:
+        futureScienceCoef = 0.5;
+        break;
+    case 2:
+        futureScienceCoef = 0.3;
+        break;
+    case 3:
         if (board->nbRounds - board->currentRound > 3) {
-            points += bv.countSciencePoints(view.id) * 0.2;
+            futureScienceCoef = 0.1;
+        } else {
+            futureScienceCoef = 0.0;
         }
-    } else {
-        points += bv.countSciencePoints(view.id) * 2.5;
+        break;
+    default:
+        std::cout << "ERROR invalid age" << std::endl;
+        break;
     }
 
+    QVector<ScienceType> listSciences = view.getSciences();
+    points += listSciences.count(ScienceAll) * 0.1; // AI wants to play ScienceAll even if score is the same
+    listSciences.append(ScienceAll);
+    points += utilCountSciencePoints(listSciences) * futureScienceCoef;
 
     points += production.evaluateScore();
     return points;
