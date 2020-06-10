@@ -12,15 +12,15 @@ namespace Tools {
     }
 
     QString imagePath(QString name) {
-        return createPath({"..", "7Wonders", "images", name});
+        return createPath({"..", "7WondersUI", "images", name});
     }
 
     QString imageWonderPath(QString name) {
-        return createPath({"..", "7Wonders", "images", "wonders", name});
+        return createPath({"..", "7WondersUI", "images", "wonders", name});
     }
 
     QString imageTokenPath(QString name) {
-        return createPath({"..", "7Wonders", "images", "tokens", name});
+        return createPath({"..", "7WondersUI", "images", "tokens", name});
     }
 
     QStringList mySplit(const QString & string, const char * separator) {

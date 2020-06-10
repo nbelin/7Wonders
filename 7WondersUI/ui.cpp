@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QString>
 #include <QPainter>
+#include <QPainterPath>
 #include <QImageReader>
 #include <QImage>
 #include <QDir>
@@ -52,6 +53,9 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     playerName->setPlaceholderText("player name");
     playerName->setValidator(new QRegExpValidator (QRegExp("\\w{0,15}"), this));
     playerName->setText(qgetenv("USER"));
+    if (playerName->text().length() == 0) {
+        playerName->setText(qgetenv("USERNAME"));
+    }
     playerName->setGeometry(QRect(500, 450, 150, 20));
 
     remoteIpAddress = new QLineEdit(menuView);
@@ -1293,7 +1297,8 @@ void UI::buttonCreateGamePressed() {
     if (serverProcess) {
         delete serverProcess;
     }
-    QString serverExePath = Tools::createPath({"7WondersServer", "7WondersServer"});
+    QString serverExePath = Tools::createPath({"..", "7WondersServer", "debug", "7WondersServer"});
+    std::cout << "server path: " << serverExePath.toStdString() << std::endl;
     serverProcess = new QProcess(this);
     serverProcess->start(serverExePath);
     QThread::msleep(200);
