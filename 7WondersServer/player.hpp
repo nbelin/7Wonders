@@ -62,5 +62,18 @@ signals:
 
 };
 
+
+
+
+class FakePlayer : public Player {
+public:
+    FakePlayer(Board * board, const char * name): Player(board, name){};
+
+    virtual void showBoard() {};
+    virtual void playImplem(const QVector<ActionType> &, const QVector<CardId> &) {};
+};
+
+
+
 #endif // PLAYER_HPP
 

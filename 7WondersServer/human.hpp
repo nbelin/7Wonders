@@ -11,7 +11,7 @@ public:
     Human(Board * board, const char * name);
 
     virtual void showBoard();
-    virtual void playImplem(const QVector<ActionType> &possibleActions, const QVector<CardId> & cards);
+    virtual void playImplem(const QVector<ActionType> & possibleActions, const QVector<CardId> & cards);
 };
 
 #endif // HUMAN_H

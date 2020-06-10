@@ -12,17 +12,18 @@
 #include <QTime>
 #include <QCoreApplication>
 
-
-Board::Board(QObject *parent) : QObject(parent),
-    nbPlayers(0),
-    nbAIs(0),
-    maxGenPlayerId(0),
-    currentRound(0),
-    currentAge(0),
-    status(StatusWaitingReady),
-    tcpserver(this) {
-
+Board::Board(QObject *parent, bool fake) : QObject(parent), tcpserver(this) {
     std::cout << "Board started" << std::endl;
+    if (fake) {
+        return;
+    }
+
+    state.nbPlayers = 0;
+    state.nbAIs = 0;
+    state.maxGenPlayerId = 0;
+    state.currentRound = 0;
+    state.currentAge = 0;
+    state.status = StatusWaitingReady;
 
     random = std::default_random_engine(QTime::currentTime().msecsSinceStartOfDay());
 
@@ -48,7 +49,7 @@ void Board::mainLoop() {
     return;
     while (true) {
         bool allReady = true;
-        for (Player * player : players) {
+        for (Player * player : state.players) {
             if (player->status == StatusNotReady) {
                 allReady = false;
             }
@@ -63,7 +64,7 @@ void Board::mainLoop() {
 
 
 void Board::addPlayerName(const QTcpSocket * socket, const char * name) {
-    if (status != StatusWaitingReady) {
+    if (state.status != StatusWaitingReady) {
         tcpserver.sendDebug("already started...");
         return;
     }
@@ -74,18 +75,18 @@ void Board::addPlayerName(const QTcpSocket * socket, const char * name) {
 
 
 void Board::setNumberAIs(int number) {
-    if (status != StatusWaitingReady) {
+    if (state.status != StatusWaitingReady) {
         tcpserver.sendDebug("already started...");
         return;
     }
-    nbAIs = number;
+    state.nbAIs = number;
     tcpserver.sendListPlayers(getListPlayers(true));
     gameProcess();
 }
 
 
 void Board::setPlayerReady(PlayerId playerId, int ready) {
-    if (status != StatusWaitingReady) {
+    if (state.status != StatusWaitingReady) {
         tcpserver.sendDebug("already started...");
         return;
     }
@@ -100,25 +101,25 @@ void Board::setPlayerReady(PlayerId playerId, int ready) {
 
 
 PlayerId Board::addPlayer(Player * player) {
-    for ( int i=0; i<players.size(); ++i ) {
-        if ( players[i] == player ) {
+    for ( int i=0; i<state.players.size(); ++i ) {
+        if ( state.players[i] == player ) {
             return -1;
         }
     }
-    players.push_back(player);
-    nbPlayers = players.size();
-    maxGenPlayerId++;
-    return maxGenPlayerId;
+    state.players.push_back(player);
+    state.nbPlayers = state.players.size();
+    state.maxGenPlayerId++;
+    return state.maxGenPlayerId;
 }
 
 
 void Board::removePlayer(Player * player) {
-    for (int i=0; i<players.size(); ++i ) {
-        if (players[i] == player) {
-            players.erase(players.begin()+i);
+    for (int i=0; i<state.players.size(); ++i ) {
+        if (state.players[i] == player) {
+            state.players.erase(state.players.begin()+i);
         }
     }
-    nbPlayers = players.size();
+    state.nbPlayers = state.players.size();
 }
 
 
@@ -128,7 +129,7 @@ void Board::askStartGame() {
         tcpserver.sendDebug("not all players ready...");
         return;
     }
-    if (nbPlayers + nbAIs < 3) {
+    if (state.nbPlayers + state.nbAIs < 3) {
         return;
     }
     tcpserver.sendDebug("game starts!");
@@ -140,10 +141,10 @@ void Board::askStartGame() {
     initAllWonders();
     initAllCards();
 
-    currentAge = 1;
-    currentRound = -1;
-    status = StatusGameStarted;
-    for (Player * player : players) {
+    state.currentAge = 1;
+    state.currentRound = -1;
+    state.status = StatusGameStarted;
+    for (Player * player : state.players) {
         player->status = StatusPlayed;
         player->view.coins = 3;
     }
@@ -167,23 +168,23 @@ void Board::askAction(PlayerId playerId, const Action & action) {
 
 
 size_t Board::getNbPlayers() const {
-    return nbPlayers;
+    return state.nbPlayers;
 }
 
 
 Player * Board::getPlayer(PlayerId playerId, size_t offset) const {
     int playerPos = getPlayerArrayId(playerId);
-    return players[(playerPos + offset) % nbPlayers];
+    return state.players[(playerPos + offset) % state.nbPlayers];
 }
 
 
 void Board::gameProcess() {
-    if (status != StatusGameStarted) {
+    if (state.status != StatusGameStarted) {
         return;
     }
 
     QStringList waitingPlayers;
-    for (Player * player : players) {
+    for (Player * player : state.players) {
         if (player->status != StatusPlayed) {
             waitingPlayers.append(player->view.name);
         }
@@ -192,11 +193,11 @@ void Board::gameProcess() {
 
 
     if (isLastRound()) {
-        for (Player * player : players) {
+        for (Player * player : state.players) {
             if (player->canPlayBothCardsAtEndOfAge && player->status == StatusPlayed && player->actionsToPlay.size() == 1) {
                 commitActionsPart1(player->view.id);
                 player->showBoard();
-                player->play({}, getCardsByAgeRoundPlayer(currentAge, currentRound, player->view.id));
+                player->play({}, getCardsByAgeRoundPlayer(state.currentAge, state.currentRound, player->view.id));
             }
         }
     }
@@ -206,19 +207,19 @@ void Board::gameProcess() {
         tcpserver.sendDebug("all players played!");
         commitActionsParts1and2();
 
-        for (Player * player : players) {
+        for (Player * player : state.players) {
             if (player->canPlayCardFromDiscarded) {
                 if (isLastRound()) {
-                    discardRemainingCardsForAge(currentAge);
+                    discardRemainingCardsForAge(state.currentAge);
                 }
-                if (discardedCards.empty()) {
+                if (state.discardedCards.empty()) {
                     player->canPlayCardFromDiscarded = false;
                     return;
                 }
                 player->showBoard();
                 tcpserver.sendMessageToPlayer(player->view.id, "Choose a discarded card to play for free");
                 tcpserver.sendMessageNotToPlayer(player->view.id, "A player is choosing a discarded card");
-                player->play({playDiscarded}, discardedCards);
+                player->play({playDiscarded}, state.discardedCards);
                 return;
             }
 
@@ -244,32 +245,43 @@ void Board::gameProcess() {
 
         if (isLastRound()) {
             resolveMilitaryConflicts();
-            discardRemainingCardsForAge(currentAge);
-            currentAge++;
-            for (Player * player : players) {
+            discardRemainingCardsForAge(state.currentAge);
+            state.currentAge++;
+            for (Player * player : state.players) {
                 player->newAge();
             }
-            currentRound = -1;
+            state.currentRound = -1;
         }
 
-        currentRound++;
-        for (Player * player : players) {
+        state.currentRound++;
+        for (Player * player : state.players) {
             player->newRound();
         }
         tcpserver.showBoard(toBoardView());
 
         if (isGameOver()) {
             tcpserver.gameOver();
-            status = StatusGameOver;
+            state.status = StatusGameOver;
             return;
         }
 
-        for (Player * player : players) {
-            if (currentRound == 0) {
+        for (Player * player : state.players) {
+        //for (int i=0; i<state.players.size(); ++i) {
+            //Player * player = state.players[i];
+            std::cout << "new player to play" << std::endl;
+            std::cout << player << std::endl;
+            std::cout << state.players[2] << std::endl;
+            if (state.currentRound == 0) {
                 player->newAge();
             }
             player->newRound();
-            player->play({}, getCardsByAgeRoundPlayer(currentAge, currentRound, player->view.id));
+            std::cout << player << std::endl;
+            std::cout << state.players[2] << std::endl;
+            std::cout << player->view.name.toStdString() << " to play" << std::endl;
+            player->play({}, getCardsByAgeRoundPlayer(state.currentAge, state.currentRound, player->view.id));
+            std::cout << player << std::endl;
+            std::cout << state.players[2] << std::endl;
+            std::cout << player->view.name.toStdString() << " played" << std::endl;
         }
     }
 }
@@ -293,10 +305,13 @@ bool Board::isValidAction(PlayerId playerId, const Action & action, QString & op
         return isValidActionFromDiscarded(playerId, action, optMessage);
     }
 
-    const QVector<CardId> & cardsToPlay = getCardsByAgeRoundPlayer(currentAge, currentRound, playerId);
+    const QVector<CardId> & cardsToPlay = getCardsByAgeRoundPlayer(state.currentAge, state.currentRound, playerId);
     CardId cardId = action.card;
     if (! cardsToPlay.contains(cardId)) {
         optMessage = "Cheater!";
+        for (CardId cid : cardsToPlay) {
+            optMessage += " " + QString::number(cid);
+        }
         return false;
     }
     if (action.type == discardCard) {
@@ -380,16 +395,16 @@ bool Board::isValidAction(PlayerId playerId, const Action & action, QString & op
 
 
 bool Board::isNewAge() const {
-    return currentRound == 0;
+    return state.currentRound == 0;
 }
 
 
 void Board::commitActionsParts1and2() {
-    for (Player * player : players) {
+    for (Player * player : state.players) {
         commitActionsPart1(player->view.id);
     }
 
-    for (Player * player : players) {
+    for (Player * player : state.players) {
         commitActionsPart2(player->view.id);
     }
 }
@@ -451,12 +466,12 @@ void Board::commitActionPart1(PlayerId playerId, int actionId) {
         int wantedStage = player->view.wonderStages.size();
         applyCardEffectsPart1(playerId, AllWonders::getWonder(player->view.wonderId).getStages(player->view.wonderFace)[wantedStage]);
 
-        player->view.wonderStages.append(currentAge);
+        player->view.wonderStages.append(state.currentAge);
     }
 
     if (action.type == discardCard) {
         player->view.coins += 3;
-        discardedCards.append(cardId);
+        state.discardedCards.append(cardId);
     }
 
     if (action.type == copyGuild) {
@@ -465,11 +480,11 @@ void Board::commitActionPart1(PlayerId playerId, int actionId) {
     }
 
     if (action.type == playDiscarded) {
-        discardedCards.removeOne(cardId);
+        state.discardedCards.removeOne(cardId);
         return; // do not remove card from remaining cards
     }
 
-    removeCardForAgeRoundPlayer(cardId, currentAge, currentRound, playerId);
+    removeCardForAgeRoundPlayer(cardId, state.currentAge, state.currentRound, playerId);
 }
 
 
@@ -566,12 +581,12 @@ void Board::applyCardEffectsPart2(PlayerId playerId, CardId cardId) {
 
 
 void Board::resolveMilitaryConflicts() {
-    for (Player * player : players) {
+    for (Player * player : state.players) {
         const Player * lp = getLeftPlayer(player->view.id);
         if (player->shields < lp->shields) {
             player->view.militaryPoints.append(-1);
         } else if (player->shields > lp->shields) {
-            player->view.militaryPoints.append(currentAge*2 - 1);
+            player->view.militaryPoints.append(state.currentAge*2 - 1);
         } else {
             player->view.militaryPoints.append(0);
         }
@@ -579,7 +594,7 @@ void Board::resolveMilitaryConflicts() {
         if (player->shields < rp->shields) {
             player->view.militaryPoints.append(-1);
         } else if (player->shields > rp->shields) {
-            player->view.militaryPoints.append(currentAge*2 - 1);
+            player->view.militaryPoints.append(state.currentAge*2 - 1);
         } else {
             player->view.militaryPoints.append(0);
         }
@@ -594,7 +609,7 @@ bool Board::isValidActionFromDiscarded(PlayerId playerId, const Action & action,
         optMessage = "Cannot play discarded card";
         return false;
     }
-    if (! discardedCards.contains(action.card)) {
+    if (! state.discardedCards.contains(action.card)) {
         optMessage = "Cheater!";
         return false;
     }
@@ -657,50 +672,94 @@ bool Board::isValidActionCopyGuild(PlayerId playerId, const Action & action, QSt
 BoardView Board::toBoardView() {
     BoardView bv;
 
-    for (Player * player : players) {
+    for (Player * player : state.players) {
         bv.players.push_back(player->view);
     }
-    for (CardId cardId : discardedCards) {
+    for (CardId cardId : state.discardedCards) {
         bv.discardedCards.push_back(AllCards::getCard(cardId).age);
     }
-    bv.currentRound = currentRound;
-    bv.currentAge = currentAge;
+    bv.currentRound = state.currentRound;
+    bv.currentAge = state.currentAge;
 
     return bv;
+}
+
+
+Board::BoardState Board::saveBoardState() const {
+    return state;
+}
+
+
+void Board::restoreFakeBoardState(const Board::BoardState & state_) {
+    state = state_;
+    for (Player * p : state_.players) {
+        //std::cout << "old player: " << p->view.id << std::endl;
+    }
+    state.players.clear();
+    for (const Player * player : state_.players) {
+        Player * newPlayer = new FakePlayer(this, "");
+        newPlayer->view = player->view;
+        newPlayer->priceToBuyLeft = player->priceToBuyLeft;
+        newPlayer->priceToBuyRight = player->priceToBuyRight;
+        newPlayer->production = player->production;
+        newPlayer->buyableResources = player->buyableResources;
+        newPlayer->shields = player->shields;
+        newPlayer->status = player->status;
+        newPlayer->actionsToPlay = player->actionsToPlay;
+        newPlayer->canPlayBothCardsAtEndOfAge = player->canPlayBothCardsAtEndOfAge;
+        newPlayer->canCopyNeirbyGuild = player->canCopyNeirbyGuild;
+        newPlayer->canCopyNeirbyGuildAlreadyUsed = player->canCopyNeirbyGuildAlreadyUsed;
+        newPlayer->canPlayCardForFree = player->canPlayCardForFree;
+        newPlayer->canPlayCardForFreeAlreadyUsed = player->canPlayCardForFreeAlreadyUsed;
+        newPlayer->canPlayCardFromDiscarded = player->canPlayCardFromDiscarded;
+    }
+    for (Player * p : state.players) {
+        //std::cout << "new player: " << p->view.id << std::endl;
+    }
+    std::cout << "restored board: " << this << std::endl;
+}
+
+
+void Board::playSingleAction(PlayerId playerId, Action & action) {
+    Player * player = getPlayer(playerId);
+    player->addPlayedAction(action);
+    commitActionPart1(playerId, 0);
+    commitActionPart2(playerId, 0);
 }
 
 
 void Board::initAllWonders() {
     QVector<WonderId> listWonders;
     for (const Wonder & wonder : AllWonders::allWonders) {
+        std::cout << "wonder : " << wonder.id << wonder.name.toStdString() << std::endl;
         listWonders.append(wonder.id);
     }
     std::shuffle(std::begin(listWonders), std::end(listWonders), random);
-    for ( size_t i=0; i<nbPlayers; ++i ) {
-        players[i]->setWonder(listWonders[i]);
+    for ( int i=0; i<state.nbPlayers; ++i ) {
+        state.players[i]->setWonder(listWonders[i]);
     }
 }
 
 
 void Board::initAllCards() {
-    remainingCards.resize(nbAges);
+    state.remainingCards.resize(nbAges);
     QVector<CardId> cardsByAge;
 
     for ( Age i=1; i<=nbAges; ++i) {
         cardsByAge = getRandomCardsByAge(i);
-        remainingCards[i-1].resize(nbPlayers);
+        state.remainingCards[i-1].resize(state.nbPlayers);
 
-        for ( size_t j=0; j<nbPlayers; ++j) {
+        for ( int j=0; j<state.nbPlayers; ++j) {
             QVector<CardId> newVec = cardsByAge.mid(j*nbRounds, nbRounds + 1);
-            remainingCards[i-1][j] = newVec;
+            state.remainingCards[i-1][j] = newVec;
         }
     }
 }
 
 
 size_t Board::getPlayerArrayId(PlayerId playerId) const {
-    for (size_t i=0; i<nbPlayers; ++i) {
-        if (players[i]->view.id == playerId) {
+    for (int i=0; i<state.nbPlayers; ++i) {
+        if (state.players[i]->view.id == playerId) {
             return i;
         }
     }
@@ -711,15 +770,15 @@ size_t Board::getPlayerArrayId(PlayerId playerId) const {
 
 Player * Board::getLeftPlayer(PlayerId playerId) const {
     size_t arrayId = getPlayerArrayId(playerId);
-    size_t newId = (arrayId + 1) % nbPlayers;
-    return players[newId];
+    size_t newId = (arrayId + 1) % state.nbPlayers;
+    return state.players[newId];
 }
 
 
 Player * Board::getRightPlayer(PlayerId playerId) const {
     size_t arrayId = getPlayerArrayId(playerId);
-    size_t newId = (arrayId + nbPlayers - 1) % nbPlayers;
-    return players[newId];
+    size_t newId = (arrayId + state.nbPlayers - 1) % state.nbPlayers;
+    return state.players[newId];
 }
 
 
@@ -744,7 +803,7 @@ QVector<CardId> Board::getRandomCardsByAge(Age age) {
         const Card & refCard = AllCards::allCards[i];
         //std::cout << (int)refCard.age << " " << (int)refCard.nbMinPlayers << std::endl;
         for ( int j=0; j<refCard.nbMinPlayers.size(); ++j ) {
-            if ( age == refCard.age && nbPlayers >= refCard.nbMinPlayers[j] && refCard.type != TypeGuild ) {
+            if ( age == refCard.age && state.nbPlayers >= refCard.nbMinPlayers[j] && refCard.type != TypeGuild ) {
                 cardsByAge.push_back(refCard.id);
                 //std::cout << cardsByAge.size() << " " << (int)refCard.age << " " << (int)refCard.nbMinPlayers << std::endl;
             }
@@ -759,8 +818,8 @@ QVector<CardId> Board::getRandomCardsByAge(Age age) {
         }
     }
 
-    if ( cardsByAge.size() != (nbRounds+1)*nbPlayers ) {
-        std::cout << "WRONG CARD NUMBER: " << (int)age << " " << cardsByAge.size() << " " << nbPlayers << std::endl;
+    if ( cardsByAge.size() != (nbRounds+1)*state.nbPlayers ) {
+        std::cout << "WRONG CARD NUMBER: " << (int)age << " " << cardsByAge.size() << " " << state.nbPlayers << std::endl;
     }
 
     std::shuffle(std::begin(cardsByAge), std::end(cardsByAge), random);
@@ -769,7 +828,7 @@ QVector<CardId> Board::getRandomCardsByAge(Age age) {
 
 
 QVector<CardId> Board::getRandomGuilds() {
-    size_t nbGuilds = nbPlayers + 2;
+    int nbGuilds = state.nbPlayers + 2;
     QVector<CardId> allGuilds;
 
     for ( int i=0; i<AllCards::allCards.size(); ++i ) {
@@ -787,12 +846,12 @@ QVector<CardId> Board::getRandomGuilds() {
 
 
 QVector<CardId> & Board::getCardsByAgeRoundPlayer(Age a, int round, PlayerId p) {
-    std::cout << "getCardsByAgeRoundPlayer " << round << " " << p << std::endl;
-    int arrayId = (getPlayerArrayId(p) + round) % nbPlayers;
+    int arrayId = (getPlayerArrayId(p) + round) % state.nbPlayers;
     if (a == 2) {
-        arrayId = (getPlayerArrayId(p) - round + nbPlayers) % nbPlayers;
+        arrayId = (getPlayerArrayId(p) - round + state.nbPlayers) % state.nbPlayers;
     }
-    return remainingCards[a-1][arrayId];
+    std::cout << "getCardsByAgeRoundPlayer " << (int)a << " " << round << " " << p << "(" << arrayId << ")" << std::endl;
+    return state.remainingCards[a-1][arrayId];
 }
 
 
@@ -804,12 +863,12 @@ void Board::removeCardForAgeRoundPlayer(CardId cardId, Age a, int round, PlayerI
 
 void Board::discardRemainingCardsForAge(Age a) {
     std::cout << "discardRemainingCardsForAge" << std::endl;
-    for (const CardsByPlayer & cards : remainingCards[a-1]) {
+    for (const CardsByPlayer & cards : state.remainingCards[a-1]) {
         for (CardId cardId : cards) {
-            discardedCards.append(cardId);
+            state.discardedCards.append(cardId);
         }
     }
-    for (CardsByPlayer & cards : remainingCards[a-1]) {
+    for (CardsByPlayer & cards : state.remainingCards[a-1]) {
         cards.clear();
     }
 }
@@ -817,7 +876,7 @@ void Board::discardRemainingCardsForAge(Age a) {
 
 QStringList Board::getListPlayers(bool withReady) {
     QStringList res;
-    for (Player * player : players) {
+    for (Player * player : state.players) {
         if (withReady) {
             res.append(QString::number(int(player->status == StatusReady)) + player->view.name);
         } else {
@@ -830,8 +889,8 @@ QStringList Board::getListPlayers(bool withReady) {
 
 
 QStringList Board::getListAIs(bool withReady) {
-    size_t remainingPlaces = 7 - nbPlayers;
-    size_t realNbAIs = nbAIs;
+    size_t remainingPlaces = 7 - state.nbPlayers;
+    size_t realNbAIs = state.nbAIs;
     if (realNbAIs > remainingPlaces) {
         realNbAIs = remainingPlaces;
     }
@@ -848,14 +907,14 @@ QStringList Board::getListAIs(bool withReady) {
 
 
 void Board::setAllPlayers(StatusPlayer status) {
-    for (Player * player : players) {
+    for (Player * player : state.players) {
         player->status = status;
     }
 }
 
 
 bool Board::areAllPlayers(StatusPlayer status) {
-    for (Player * player : players) {
+    for (Player * player : state.players) {
         if (player->status != status) {
             return false;
         }
@@ -865,7 +924,7 @@ bool Board::areAllPlayers(StatusPlayer status) {
 
 
 bool Board::areAllPlayersNot(StatusPlayer status) {
-    for (Player * player : players) {
+    for (Player * player : state.players) {
         if (player->status == status) {
             return false;
         }
@@ -875,15 +934,15 @@ bool Board::areAllPlayersNot(StatusPlayer status) {
 
 
 bool Board::isLastRound() const {
-    return currentRound == nbRounds - 1;
+    return state.currentRound == nbRounds - 1;
 }
 
 
 bool Board::isLastAge() const {
-    return currentAge == nbAges;
+    return state.currentAge == nbAges;
 }
 
 
 bool Board::isGameOver() const {
-    return currentAge > nbAges;
+    return state.currentAge > nbAges;
 }

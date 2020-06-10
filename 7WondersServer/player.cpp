@@ -35,7 +35,7 @@ void Player::setWonder(WonderId wonderId) {
     const Wonder & wonder = AllWonders::getWonder(wonderId);
     production.addResource(wonder.baseIncome);
     buyableResources.addResource(wonder.baseIncome);
-    std::cout << view.name.toStdString() << ": " << wonder.name.toStdString() << std::endl;
+    std::cout << "set wonder: " << view.name.toStdString() << ": " << wonderId << " " << wonder.name.toStdString() << std::endl;
 }
 
 
@@ -98,6 +98,8 @@ double Player::evaluateScore() {
     BoardView bv = board->toBoardView();
     double points = bv.countPoints(view.id);
 
+
+    // military
     Shield leftShields = board->getLeftPlayer(view.id)->shields;
     Shield rightShields = board->getRightPlayer(view.id)->shields;
 
@@ -115,8 +117,9 @@ double Player::evaluateScore() {
     }
 
 
+    // science
     double futureScienceCoef = 0.0;
-    switch (board->currentAge) {
+    switch (board->state.currentAge) {
     case 1:
         futureScienceCoef = 0.5;
         break;
@@ -124,7 +127,7 @@ double Player::evaluateScore() {
         futureScienceCoef = 0.3;
         break;
     case 3:
-        if (board->nbRounds - board->currentRound > 3) {
+        if (board->nbRounds - board->state.currentRound > 3) {
             futureScienceCoef = 0.1;
         } else {
             futureScienceCoef = 0.0;
@@ -140,7 +143,33 @@ double Player::evaluateScore() {
     listSciences.append(ScienceAll);
     points += utilCountSciencePoints(listSciences) * futureScienceCoef;
 
+
+    // economy
     points += production.evaluateScore();
+
+
+    // special
+    if (canPlayBothCardsAtEndOfAge) {
+        points += 4.5;
+    }
+
+    if (canCopyNeirbyGuild) {
+        points += 6.5;
+    }
+
+    if (canPlayCardForFree) {
+        points += 2.5;
+    }
+
+    if (canPlayCardForFreeAlreadyUsed) {
+        points -= 0.5;
+    }
+
+    if (canPlayCardFromDiscarded) {
+        points += board->isLastRound();
+        points += board->state.currentAge;
+    }
+
     return points;
 }
 

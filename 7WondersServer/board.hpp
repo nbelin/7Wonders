@@ -39,7 +39,25 @@ class Board : public QObject {
     Q_OBJECT
 
 public:
-    explicit Board(QObject * parent = nullptr);
+    enum StatusBoard {
+        StatusWaitingReady,
+        StatusGameStarted,
+        StatusGameOver
+    };
+
+    struct BoardState {
+        int nbPlayers; // might be more than 7 - nbAIs
+        int nbAIs; // might be more than 7 - nbPlayers
+        PlayerId maxGenPlayerId;
+        QVector<CardsByAgeByPlayer> remainingCards;
+        QVector<Player *> players;
+        QVector<CardId> discardedCards;
+        int currentRound; // from 0 to 5
+        Age currentAge; // from 1 to 3
+        StatusBoard status;
+    };
+
+    explicit Board(QObject * parent = nullptr, bool fake=false);
     virtual ~Board();
 
     void mainLoop();
@@ -51,6 +69,9 @@ public:
     bool isValidAction(PlayerId playerId, const Action & action, QString & optMessage);
     bool isNewAge() const;
     BoardView toBoardView();
+    BoardState saveBoardState() const;
+    void restoreFakeBoardState(const BoardState & state);
+    void playSingleAction(PlayerId playerId, Action & action);
 
 signals:
 
@@ -62,12 +83,6 @@ public slots:
     void askAction(PlayerId playerId, const Action & action);
 
 private:
-    enum StatusBoard {
-        StatusWaitingReady,
-        StatusGameStarted,
-        StatusGameOver
-    };
-
     void initAllWonders();
     void initAllCards();
     void gameLoop();
@@ -106,15 +121,7 @@ public:
     static const int nbAges = 3;
     static const int nbRounds = 6;
 
-    size_t nbPlayers; // might be more than 7 - nbAIs
-    size_t nbAIs; // might be more than 7 - nbPlayers
-    PlayerId maxGenPlayerId;
-    QVector<CardsByAgeByPlayer> remainingCards;
-    QVector<Player *> players;
-    QVector<CardId> discardedCards;
-    int currentRound; // from 0 to 5
-    Age currentAge; // from 1 to 3
-    StatusBoard status;
+    BoardState state;
     TcpServer tcpserver;
     QTimer * timer;
 
