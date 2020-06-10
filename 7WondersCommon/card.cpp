@@ -81,21 +81,20 @@ int utilCountSciencePointsRec(const QVector<ScienceType> & listSciences, int cur
     ScienceType science = listSciences[currentId];
     if (science == ScienceAll) {
         int best = 0;
-        int bestId = 0;
         for (int i=0; i<3; ++i) {
             nbSciences[i]++;
             int tmp = utilCountSciencePointsRec(listSciences, currentId + 1, nbSciences);
+            nbSciences[i]--;
             if (tmp > best) {
                 best = tmp;
-                bestId = i;
             }
-            nbSciences[i]--;
         }
-        nbSciences[bestId]++;
         return best;
     } else {
         nbSciences[science]++;
-        return utilCountSciencePointsRec(listSciences, currentId + 1, nbSciences);
+        int val = utilCountSciencePointsRec(listSciences, currentId + 1, nbSciences);
+        nbSciences[science]--;
+        return val;
     }
 }
 
