@@ -3,14 +3,18 @@
 #include <iostream>
 
 
-AI::AI(Board * board, const char * name) : Player(board, name)
-{
+AI::AI(Board * board, const char * name) : Player(board, name) {
     fakeBoard = new Board(nullptr, true);
 }
 
 
-void AI::showBoard() {
+AI::~AI() {
     delete fakeBoard;
+}
+
+
+void AI::showBoard() {
+    //do nothing
 }
 
 
