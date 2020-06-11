@@ -66,7 +66,7 @@ public:
     size_t getNbPlayers() const;
     Player * getPlayer(PlayerId playerId, size_t offset = 0) const;
     TcpServer & getServer() { return tcpserver; }
-    bool isValidAction(PlayerId playerId, const Action & action, QString & optMessage);
+    bool isValidAction(PlayerId playerId, const Action & action, QString & optMessage, QVector<Resource> * listMissing = nullptr);
     bool isNewAge() const;
     BoardView toBoardView();
     BoardState saveBoardState() const;

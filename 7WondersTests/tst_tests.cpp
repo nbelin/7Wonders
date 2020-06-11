@@ -7,6 +7,7 @@
 #include "card.hpp"
 #include "playerview.hpp"
 #include "boardview.hpp"
+#include "resourceproduction.hpp"
 
 
 class Tests : public QObject
@@ -18,6 +19,7 @@ public:
     QApplication * qa;
 
 private Q_SLOTS:
+    void testProduction();
     void testCountPoints();
     void testPlayerView();
     void testBoardView();
@@ -25,12 +27,78 @@ private Q_SLOTS:
 
 
 Tests::Tests() {
+    qDebug().setVerbosity(QDebug::MaximumVerbosity);
+
     int argc = 0;
     char **argv = NULL;
     qa = new QApplication(argc, argv); // needed to create QWidgets
 
     AllCards::init();
     AllWonders::init();
+}
+
+
+void Tests::testProduction() {
+    ResourceProduction prod;
+    QVERIFY(! prod.canProduce(Resource(Resource::ONE_ORE)));
+
+    prod.addResource(Resource(Resource::ONE_ALL));
+    QVERIFY(prod.canProduce(Resource(Resource::ONE_ORE)));
+    QVERIFY(! prod.canProduce(Resource(Resource::ONE_ORE, 2)));
+    QVERIFY(! prod.canProduce(Resource(Resource::ONE_ORE | Resource::ONE_GLASS)));
+
+    prod.addResource(Resource(Resource::ONE_CLAY));
+    QVERIFY(prod.canProduce(Resource(Resource::ONE_CLAY, 2)));
+    QVERIFY(prod.canProduce(Resource(Resource::ONE_ORE | Resource::ONE_CLAY)));
+    QVERIFY(! prod.canProduce(Resource(Resource::ONE_ORE, 2)));
+    QVERIFY(! prod.canProduce(Resource(Resource::ONE_ORE | Resource::ONE_GLASS)));
+
+    prod.addResource(Resource(Resource::ONE_ALL_MANUFACTURED));
+    QVERIFY(prod.canProduce(Resource(Resource::ONE_CLAY, 2)));
+    QVERIFY(prod.canProduce(Resource(Resource::ONE_GLASS, 2)));
+    QVERIFY(prod.canProduce(Resource(Resource::ONE_ORE | Resource::ONE_CLAY)));
+    QVERIFY(prod.canProduce(Resource(Resource::ONE_ORE | Resource::ONE_CLAY | Resource::ONE_GLASS)));
+    QVERIFY(! prod.canProduce(Resource(Resource::ONE_ORE, 2)));
+    QVERIFY(! prod.canProduce(Resource(Resource::ONE_WOOD, 2)));
+    QVERIFY(! prod.canProduce(Resource(Resource::ONE_GLASS, 3)));
+
+    QVector<Resource> listMissing;
+    listMissing = prod.listMissingRes(Resource(Resource::ONE_WOOD));
+    QVERIFY(listMissing.length() == 0);
+
+    listMissing = prod.listMissingRes(Resource(Resource::ONE_WOOD, 2));
+    QVERIFY(listMissing.length() == 1);
+    QVERIFY(listMissing.contains(Resource(Resource::ONE_WOOD)));
+
+    listMissing = prod.listMissingRes(Resource(Resource::ONE_WOOD | Resource::ONE_ORE));
+    QVERIFY(listMissing.length() == 2);
+    QVERIFY(listMissing.contains(Resource(Resource::ONE_ORE)));
+    QVERIFY(listMissing.contains(Resource(Resource::ONE_WOOD)));
+
+    listMissing = prod.listMissingRes(Resource(Resource::ONE_WOOD | Resource::ONE_ORE, 2));
+    QVERIFY(listMissing.length() == 2);
+    QVERIFY(listMissing.contains(Resource(0, 1, 0, 2, 0, 0, 0)));
+    QVERIFY(listMissing.contains(Resource(0, 2, 0, 1, 0, 0, 0)));
+
+    listMissing = prod.listMissingRes(Resource(Resource::ONE_WOOD | Resource::ONE_ORE | Resource::ONE_CLAY, 2));
+    QVERIFY(listMissing.length() == 3);
+    QVERIFY(listMissing.contains(Resource(0, 2, 0, 2, 0, 0, 0)));
+    QVERIFY(listMissing.contains(Resource(1, 1, 0, 2, 0, 0, 0)));
+    QVERIFY(listMissing.contains(Resource(1, 2, 0, 1, 0, 0, 0)));
+
+    listMissing = prod.listMissingRes(Resource(Resource::ONE_WOOD | Resource::ONE_ORE | Resource::ONE_CLAY | Resource::ONE_GLASS | Resource::ONE_LOOM));
+    QVERIFY(listMissing.length() == 5);
+    QVERIFY(listMissing.contains(Resource(Resource::ONE_WOOD | Resource::ONE_LOOM)));
+    QVERIFY(listMissing.contains(Resource(Resource::ONE_WOOD | Resource::ONE_GLASS)));
+    QVERIFY(listMissing.contains(Resource(Resource::ONE_ORE | Resource::ONE_LOOM)));
+    QVERIFY(listMissing.contains(Resource(Resource::ONE_ORE | Resource::ONE_GLASS)));
+    QVERIFY(listMissing.contains(Resource(Resource::ONE_ORE | Resource::ONE_WOOD)));
+
+    listMissing = prod.listMissingRes(Resource(Resource::ONE_ALL_MANUFACTURED));
+    QVERIFY(listMissing.length() == 3);
+    QVERIFY(listMissing.contains(Resource(Resource::ONE_LOOM)));
+    QVERIFY(listMissing.contains(Resource(Resource::ONE_GLASS)));
+    QVERIFY(listMissing.contains(Resource(Resource::ONE_PAPYRUS)));
 }
 
 

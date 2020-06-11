@@ -30,15 +30,16 @@ public:
 
     static const int ONE_ALL_RAW           = ONE_CLAY + ONE_ORE + ONE_STONE + ONE_WOOD;
     static const int ONE_ALL_MANUFACTURED  = ONE_GLASS + ONE_LOOM + ONE_PAPYRUS;
-    static const int ONE_ALL     = ONE_ALL_RAW + ONE_ALL_MANUFACTURED;
+    static const int ONE_ALL               = ONE_ALL_RAW + ONE_ALL_MANUFACTURED;
 
     ResUnit array[IdMAX];
 
     Resource();
     Resource(const Resource & other);
-    Resource & operator = (const Resource & other);
     Resource(ResUnit clay, ResUnit ore, ResUnit stone, ResUnit wood, ResUnit glass, ResUnit loom, ResUnit papyrus);
     Resource(int oneList, int multiplicator=1);
+    Resource & operator = (const Resource & other);
+    bool operator == (const Resource & other) const;
 
     bool hasOnlyOne() const;
     bool isZero() const;

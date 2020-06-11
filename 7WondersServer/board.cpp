@@ -266,28 +266,17 @@ void Board::gameProcess() {
         }
 
         for (Player * player : state.players) {
-        //for (int i=0; i<state.players.size(); ++i) {
-            //Player * player = state.players[i];
-            std::cout << "new player to play" << std::endl;
-            std::cout << player << std::endl;
-            std::cout << state.players[2] << std::endl;
             if (state.currentRound == 0) {
                 player->newAge();
             }
             player->newRound();
-            std::cout << player << std::endl;
-            std::cout << state.players[2] << std::endl;
-            std::cout << player->view.name.toStdString() << " to play" << std::endl;
             player->play({}, getCardsByAgeRoundPlayer(state.currentAge, state.currentRound, player->view.id));
-            std::cout << player << std::endl;
-            std::cout << state.players[2] << std::endl;
-            std::cout << player->view.name.toStdString() << " played" << std::endl;
         }
     }
 }
 
 
-bool Board::isValidAction(PlayerId playerId, const Action & action, QString & optMessage) {
+bool Board::isValidAction(PlayerId playerId, const Action & action, QString & optMessage, QVector<Resource> * listMissing) {
     if (action.card == CardIdInvalid) {
         optMessage = "Unknown card";
         return false;
@@ -387,6 +376,9 @@ bool Board::isValidAction(PlayerId playerId, const Action & action, QString & op
         optMessage += costResources.display();
         optMessage += "\n";
         optMessage += player->production.debug();
+        if (listMissing != nullptr) {
+            *listMissing = player->production.listMissingRes(costResources);
+        }
         return false;
     }
 
@@ -440,13 +432,13 @@ void Board::commitActionPart1(PlayerId playerId, int actionId) {
 
     CardId cardId = action.card;
 
-    int payLeft = action.boughtFromLeft.multiplyAndSum(player->priceToBuyLeft);
-    int payRight = action.boughtFromRight.multiplyAndSum(player->priceToBuyRight);
     if (action.type == playFreeCard) {
         player->canPlayCardForFreeAlreadyUsed = true;
-    } else if (player->canPlayCardFromDiscarded) {
-        player->canPlayCardFromDiscarded = false;
-    } else {
+    }
+
+    if (action.type == playCard || action.type == buildWonder) {
+        int payLeft = action.boughtFromLeft.multiplyAndSum(player->priceToBuyLeft);
+        int payRight = action.boughtFromRight.multiplyAndSum(player->priceToBuyRight);
         player->view.coins -= (payLeft + payRight);
         leftPlayer->view.coins += payLeft;
         rightPlayer->view.coins += payRight;
@@ -480,6 +472,7 @@ void Board::commitActionPart1(PlayerId playerId, int actionId) {
     }
 
     if (action.type == playDiscarded) {
+        player->canPlayCardFromDiscarded = false;
         state.discardedCards.removeOne(cardId);
         return; // do not remove card from remaining cards
     }

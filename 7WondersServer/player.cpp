@@ -146,6 +146,30 @@ double Player::evaluateScore() {
 
     // economy
     points += production.evaluateScore();
+    if (! board->isLastAge()) {
+        Currency usefulNbCoins = view.coins;
+        if (usefulNbCoins > 8) {
+            // stop giving more points if user has already too much coins
+            usefulNbCoins = 8;
+        }
+        points += usefulNbCoins * 0.25;
+    }
+    for (int i=0; i<Resource::IdMAX; ++i) {
+        int priceBoth = priceToBuyLeft.array[i] + priceToBuyRight.array[i];
+        switch (priceBoth) {
+        case 2:
+            points += 3;
+            break;
+        case 3:
+            points += 2.25;
+            break;
+        case 4:
+            break;
+        default:
+            std::cout << "ERROR invalid price to buy" << std::endl;
+            break;
+        }
+    }
 
 
     // special

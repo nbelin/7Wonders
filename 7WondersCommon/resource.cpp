@@ -16,14 +16,6 @@ Resource::Resource(const Resource & other) {
 }
 
 
-Resource & Resource::operator = (const Resource & other) {
-    for ( size_t i=0; i<IdMAX; ++i ) {
-        array[i] = other.array[i];
-    }
-    return *this;
-}
-
-
 Resource::Resource(ResUnit clay, ResUnit ore, ResUnit stone, ResUnit wood, ResUnit glass, ResUnit loom, ResUnit papyrus) {
     array[IdClay] = clay;
     array[IdOre] = ore;
@@ -57,6 +49,24 @@ Resource::Resource(int oneList, int multiplicator): Resource() {
     if ( ( oneList & ONE_PAPYRUS ) != 0 ) {
         array[IdPapyrus] = multiplicator;
     }
+}
+
+
+Resource & Resource::operator = (const Resource & other) {
+    for ( size_t i=0; i<IdMAX; ++i ) {
+        array[i] = other.array[i];
+    }
+    return *this;
+}
+
+
+bool Resource::operator == (const Resource & other) const {
+    for ( size_t i=0; i<IdMAX; ++i ) {
+        if (array[i] != other.array[i]) {
+            return false;
+        }
+    }
+    return true;
 }
 
 

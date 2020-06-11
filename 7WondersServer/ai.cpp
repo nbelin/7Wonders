@@ -23,6 +23,13 @@ void AI::playImplem(const QVector<ActionType> & possibleActions, const QVector<C
 
     Action bestAction;
     double bestScore = -999.9;
+    QVector<Resource> listMissing;
+
+    const ResourceProduction & buyableLeft = board->getLeftPlayer(view.id)->buyableResources;
+    const ResourceProduction & buyableRight = board->getRightPlayer(view.id)->buyableResources;
+    ResourceProduction buyable;
+    buyable.addResourceProduction(buyableLeft);
+    buyable.addResourceProduction(buyableRight);
 
     Board::BoardState state = board->saveBoardState();
 
@@ -32,21 +39,65 @@ void AI::playImplem(const QVector<ActionType> & possibleActions, const QVector<C
         for ( CardId cardId : cards ) {
             action.card = cardId;
             fakeBoard->restoreFakeBoardState(state);
-            //std::cout << fakeBoard->toBoardView().toString().toStdString() << std::endl;
-            //std::cout << "test action: " << AllCards::getCard(cardId).name << std::endl;
             action.display();
-            if (fakeBoard->isValidAction(view.id, action, dummy)) {
-                //std::cout << "valid!" << std::endl;
+            listMissing.clear();
+            if (fakeBoard->isValidAction(view.id, action, dummy, &listMissing)) {
                 fakeBoard->playSingleAction(view.id, action);
                 double score = fakeBoard->getPlayer(view.id)->evaluateScore();
-                //std::cout << "score: " << score << std::endl;
                 if (score > bestScore) {
                     bestScore = score;
                     bestAction = action;
-                    std::cout << "replace best score !" << std::endl;
+                }
+            } else if (listMissing.length() > 0 && listMissing.length() <= view.coins) {
+                // cannot play because of missing resources, try to see if we buy them
+                int minToPay = view.coins + 1;
+
+                for (const Resource & missingRes : listMissing) {
+                    if (buyable.canProduce(missingRes)) {
+                        Resource buyLeft;
+                        Resource buyRight;
+
+                        for (int i=0; i<Resource::IdMAX; ++i) {
+                            for (int j=0; j<missingRes.array[i]; ++j) {
+                                Resource maybeToBuyLeft = buyLeft;
+                                maybeToBuyLeft.array[i]++;
+                                Resource maybeToBuyRight = buyRight;
+                                maybeToBuyRight.array[i]++;
+                                if (priceToBuyLeft.array[i] < priceToBuyRight.array[i] && buyableLeft.canProduce(maybeToBuyLeft)) {
+                                    buyLeft.array[i]++;
+                                } else if (priceToBuyLeft.array[i] > priceToBuyRight.array[i] && buyableRight.canProduce(maybeToBuyRight)) {
+                                    buyRight.array[i]++;
+                                } else {
+                                    if (buyableLeft.canProduce(maybeToBuyLeft)) {
+                                        buyLeft.array[i]++;
+                                    } else {
+                                        buyRight.array[i]++;
+                                    }
+                                }
+                            }
+                        }
+
+                        int payLeft = buyLeft.multiplyAndSum(priceToBuyLeft);
+                        int payRight = buyRight.multiplyAndSum(priceToBuyRight);
+                        int pay = payLeft + payRight;
+                        if (pay < minToPay) {
+                            minToPay = pay;
+                            action.boughtFromLeft = buyLeft;
+                            action.boughtFromRight = buyRight;
+                        }
+
+                    }
+                }
+
+                if (fakeBoard->isValidAction(view.id, action, dummy, &listMissing)) {
+                    fakeBoard->playSingleAction(view.id, action);
+                    double score = fakeBoard->getPlayer(view.id)->evaluateScore();
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestAction = action;
+                    }
                 }
             }
-            //std::cout << "not valid! " << dummy.toStdString() << std::endl;
         }
     }
 

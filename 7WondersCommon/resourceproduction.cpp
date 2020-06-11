@@ -1,7 +1,16 @@
 #include "resourceproduction.hpp"
 
+
 ResourceProduction::ResourceProduction() {
 
+}
+
+
+void ResourceProduction::addResourceProduction(const ResourceProduction & other) {
+    constant.addResource(other.constant);
+    for (const Resource & res : other.flexibles) {
+        flexibles.append(res);
+    }
 }
 
 
@@ -17,35 +26,21 @@ void ResourceProduction::addResource(const Resource & resource) {
 }
 
 
-bool ResourceProduction::canProduce(const Resource & target) {
+bool ResourceProduction::canProduce(const Resource & target) const {
     Resource simplifiedTarget(target);
     simplifiedTarget.substractResource(constant);
 
-    return canProduceRec(simplifiedTarget, flexibles, 0);
+    return canProduceRec(simplifiedTarget, flexibles, 0, nullptr);
+}
 
-    //// might need optimisations later on?
 
-    // most simple case: no need to verify flexible resources
-    if (simplifiedTarget.isZero()) {
-        return true;
-    }
+QVector<Resource> ResourceProduction::listMissingRes(const Resource & target) const {
+    Resource simplifiedTarget(target);
+    simplifiedTarget.substractResource(constant);
+    QVector<Resource> listMissing;
 
-    // quite simple case: only one resource missing, so check flexible resources for this one
-    if (simplifiedTarget.hasOnlyOne()) {
-        size_t oneIndex = simplifiedTarget.getOneIndex();
-        unsigned char targetValue = simplifiedTarget.array[oneIndex];
-        unsigned char flexValue = 0;
-        for ( const Resource & flex : flexibles ) {
-            flexValue += flex.array[oneIndex];
-            if (flexValue >= targetValue) {
-                return true;
-            }
-        }
-    }
-
-    // more complex: check with flexibles where only one resource is needed
-    for ( const Resource & flex : flexibles ) {
-    }
+    (void) canProduceRec(simplifiedTarget, flexibles, 0, &listMissing);
+    return listMissing;
 }
 
 
@@ -91,25 +86,28 @@ double ResourceProduction::evaluateScore() const {
 }
 
 
-bool ResourceProduction::canProduceRec(Resource & target, const QVector<Resource> & flexibles, int currentFlexible) {
+bool ResourceProduction::canProduceRec(Resource & target, const QVector<Resource> & flexibles, int currentFlexible, QVector<Resource> * listMissing) const {
     if (target.isZero()) {
         return true;
     }
     if (currentFlexible >= flexibles.size()) {
+        if (listMissing != nullptr && ! listMissing->contains(target)) {
+            listMissing->append(target);
+        }
         return false;
     }
 
     const QVector<size_t> & commonIndexes = target.commonIndexes(flexibles[currentFlexible]);
 
     if (commonIndexes.empty()) {
-        return canProduceRec(target, flexibles, currentFlexible+1);
+        return canProduceRec(target, flexibles, currentFlexible+1, listMissing);
     }
 
     for ( size_t idx : commonIndexes ) {
         target.array[idx] -= 1; // assume flexible resources are only 1 by 1
-        bool ret = canProduceRec(target, flexibles, currentFlexible+1);
+        bool ret = canProduceRec(target, flexibles, currentFlexible+1, listMissing);
         target.array[idx] += 1;
-        if (ret) {
+        if (listMissing == nullptr && ret) {
             return true;
         }
     }
