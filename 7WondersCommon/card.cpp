@@ -200,6 +200,9 @@ CardId AllCards::getCardId(QString cardName) {
 
 void AllCards::init() {
     allCards.clear();
+    Card invalidCard;
+    invalidCard.name = "Invalid Card";
+    allCards.append(invalidCard);
 
     // Age 1
     addResourceRaw("Lumber Yard", 1, {3, 4}, 0, Resource(Resource::ONE_WOOD));

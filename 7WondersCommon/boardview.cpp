@@ -137,9 +137,7 @@ int BoardView::countGuildPoints(PlayerId playerId) {
     for (CardId cardId : player.playedCards) {
         const Card & card = AllCards::getCard(cardId);
         if (card.type == TypeGuild) {
-            std::cout << "count points from card: " << card.name << std::endl;
             if (card.cardTypesCondition.empty()) {
-                std::cout << "no condition: " << card.points << std::endl;
                 count += card.points;
             } else {
                 for ( CardType typeCondition : card.cardTypesCondition ) {
@@ -163,7 +161,6 @@ int BoardView::countGuildPoints(PlayerId playerId) {
                     }
                 }
             }
-            std::cout << "total count: " << count << std::endl;
         }
     }
     return count;

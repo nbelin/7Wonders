@@ -35,15 +35,17 @@ void AI::playImplem(const QVector<ActionType> & possibleActions, const QVector<C
 
     Action action;
     for ( ActionType type : possibleActions ) {
-        action.type = type;
         for ( CardId cardId : cards ) {
+            action.reset();
+            action.type = type;
             action.card = cardId;
-            fakeBoard->restoreFakeBoardState(state);
             action.display();
             listMissing.clear();
+            fakeBoard->restoreFakeBoardState(state);
             if (fakeBoard->isValidAction(view.id, action, dummy, &listMissing)) {
                 fakeBoard->playSingleAction(view.id, action);
                 double score = fakeBoard->getPlayer(view.id)->evaluateScore();
+                std::cout << "score: " << score << std::endl;
                 if (score > bestScore) {
                     bestScore = score;
                     bestAction = action;
@@ -89,9 +91,12 @@ void AI::playImplem(const QVector<ActionType> & possibleActions, const QVector<C
                     }
                 }
 
-                if (fakeBoard->isValidAction(view.id, action, dummy, &listMissing)) {
+                action.display();
+                fakeBoard->restoreFakeBoardState(state);
+                if (fakeBoard->isValidAction(view.id, action, dummy)) {
                     fakeBoard->playSingleAction(view.id, action);
                     double score = fakeBoard->getPlayer(view.id)->evaluateScore();
+                    std::cout << "score: " << score << std::endl;
                     if (score > bestScore) {
                         bestScore = score;
                         bestAction = action;
@@ -102,6 +107,9 @@ void AI::playImplem(const QVector<ActionType> & possibleActions, const QVector<C
     }
 
     // no action is possible (example: play discarded cards and all of them already built)
+    std::cout << "best action for " << view.name.toStdString() << std::endl;
+    bestAction.display();
+    std::cout << "last error: " << dummy.toStdString() << std::endl;
     addPlayedAction(bestAction);
 }
 

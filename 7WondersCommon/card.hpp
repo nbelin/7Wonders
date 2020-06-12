@@ -7,7 +7,7 @@
 #include "resource.hpp"
 
 typedef int CardId;
-const CardId CardIdInvalid = -1;
+const CardId CardIdInvalid = 0;
 typedef unsigned char Age;
 typedef unsigned char Shield;
 typedef unsigned char VictoryPoint;

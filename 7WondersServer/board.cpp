@@ -232,7 +232,6 @@ void Board::gameProcess() {
                         }
                     }
                 }
-                player->canCopyNeirbyGuildAlreadyUsed = true;
                 if (!neirbyGuilds.empty()) {
                     player->showBoard();
                     tcpserver.sendMessageToPlayer(player->view.id, "Choose a guild to copy from neirby guilds");
@@ -340,6 +339,7 @@ bool Board::isValidAction(PlayerId playerId, const Action & action, QString & op
     }
 
     Resource costResources;
+    Currency costCoins;
     if (action.type == playCard) {
         if (player->view.playedCards.contains(action.card)) {
             optMessage = "Card already played";
@@ -351,7 +351,8 @@ bool Board::isValidAction(PlayerId playerId, const Action & action, QString & op
                 return true;
             }
         }
-        costResources = AllCards::getCard(action.card).costResources;
+        costResources = refCard.costResources;
+        costCoins = refCard.costCoins;
     }
     if (action.type == buildWonder) {
         int wantedStage = player->view.wonderStages.size();
@@ -361,6 +362,12 @@ bool Board::isValidAction(PlayerId playerId, const Action & action, QString & op
             return false;
         }
         costResources = AllCards::getCard(wonderStages[wantedStage]).costResources;
+        costCoins = AllCards::getCard(wonderStages[wantedStage]).costCoins;
+    }
+
+    if (payLeft + payRight + costCoins > player->view.coins) {
+        optMessage = "Insufficient coins";
+        return false;
     }
 
     if (payLeft > 0) {
@@ -419,7 +426,7 @@ void Board::commitActionsPart2(PlayerId playerId) {
 
 
 void Board::commitActionPart1(PlayerId playerId, int actionId) {
-    std::cout << "commitActionPart1 " << playerId << std::endl;
+    //std::cout << "commitActionPart1 " << playerId << std::endl;
     Player * player = getPlayer(playerId);
     Player * leftPlayer = getLeftPlayer(playerId);
     Player * rightPlayer= getRightPlayer(playerId);
@@ -467,6 +474,7 @@ void Board::commitActionPart1(PlayerId playerId, int actionId) {
     }
 
     if (action.type == copyGuild) {
+        player->canCopyNeirbyGuildAlreadyUsed = true;
         player->view.playedCards.append(cardId);
         return; // do not remove card from anywhere
     }
@@ -482,7 +490,7 @@ void Board::commitActionPart1(PlayerId playerId, int actionId) {
 
 
 void Board::commitActionPart2(PlayerId playerId, int actionId) {
-    std::cout << "commitActionPart2 " << playerId << std::endl;
+    //std::cout << "commitActionPart2 " << playerId << std::endl;
     Player * player = getPlayer(playerId);
     Action & action = player->actionsToPlay[actionId];
 
@@ -709,7 +717,7 @@ void Board::restoreFakeBoardState(const Board::BoardState & state_) {
     for (Player * p : state.players) {
         //std::cout << "new player: " << p->view.id << std::endl;
     }
-    std::cout << "restored board: " << this << std::endl;
+    //std::cout << "restored board: " << this << std::endl;
 }
 
 
@@ -843,19 +851,19 @@ QVector<CardId> & Board::getCardsByAgeRoundPlayer(Age a, int round, PlayerId p) 
     if (a == 2) {
         arrayId = (getPlayerArrayId(p) - round + state.nbPlayers) % state.nbPlayers;
     }
-    std::cout << "getCardsByAgeRoundPlayer " << (int)a << " " << round << " " << p << "(" << arrayId << ")" << std::endl;
+    //std::cout << "getCardsByAgeRoundPlayer " << (int)a << " " << round << " " << p << "(" << arrayId << ")" << std::endl;
     return state.remainingCards[a-1][arrayId];
 }
 
 
 void Board::removeCardForAgeRoundPlayer(CardId cardId, Age a, int round, PlayerId p) {
-    std::cout << "removeCardForAgeRoundPlayer" << std::endl;
+    //std::cout << "removeCardForAgeRoundPlayer" << std::endl;
     getCardsByAgeRoundPlayer(a, round, p).removeOne(cardId);
 }
 
 
 void Board::discardRemainingCardsForAge(Age a) {
-    std::cout << "discardRemainingCardsForAge" << std::endl;
+    //std::cout << "discardRemainingCardsForAge" << std::endl;
     for (const CardsByPlayer & cards : state.remainingCards[a-1]) {
         for (CardId cardId : cards) {
             state.discardedCards.append(cardId);

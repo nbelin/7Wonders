@@ -168,23 +168,23 @@ void Tests::testBoardView() {
 
 
     pv.playedCards.clear();
-    pv.playedCards.append(7);
-    pv.playedCards.append(14);
-    pv.playedCards.append(10);
+    pv.playedCards.append(8);
+    pv.playedCards.append(15);
+    pv.playedCards.append(11);
     pv.playedCards.append(2);
-    pv.playedCards.append(24);
     pv.playedCards.append(25);
-    pv.playedCards.append(33);
-    pv.playedCards.append(30);
-    pv.playedCards.append(49);
-    pv.playedCards.append(29);
-    pv.playedCards.append(37);
-    pv.playedCards.append(53);
-    pv.playedCards.append(52);
-    pv.playedCards.append(62);
+    pv.playedCards.append(26);
+    pv.playedCards.append(34);
+    pv.playedCards.append(31);
     pv.playedCards.append(50);
-    pv.playedCards.append(75);
-    pv.playedCards.append(65);
+    pv.playedCards.append(30);
+    pv.playedCards.append(38);
+    pv.playedCards.append(54);
+    pv.playedCards.append(53);
+    pv.playedCards.append(63);
+    pv.playedCards.append(51);
+    pv.playedCards.append(76);
+    pv.playedCards.append(66);
 
     bv.players.clear();
     bv.players.append(pv);

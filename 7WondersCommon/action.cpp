@@ -28,7 +28,7 @@ void Action::simplifyForView() {
 void Action::display() {
     std::cout << ActionTypeToString(type).toStdString()
               << " "
-              << QString::number(card).toStdString()
+              << AllCards::getCard(card).name
               << " "
               << boughtFromLeft.display().toStdString()
               << " "
