@@ -14,15 +14,7 @@ CONFIG += c++11
 
 
 CONFIG += file_copies
-COPIES += resources
-resources.files = $$files(../images)
-resources.path = $$OUT_PWD
-
-#copydata.commands = $(COPY_DIR) $$PWD/../images $$OUT_PWD/..
-#first.depends = $(first) copydata
-#export(first.depends)
-#export(copydata.commands)
-#QMAKE_EXTRA_TARGETS += first copydata
+RESOURCES += ../7Wonders.qrc
 
 
 SOURCES += main.cpp \

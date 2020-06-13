@@ -9,7 +9,8 @@ QT       -= gui
 TARGET = 7WondersCommon
 TEMPLATE = lib
 CONFIG += c++11
-CONFIG += staticlib
+
+win32:CONFIG += staticlib
 
 SOURCES += \
     action.cpp \

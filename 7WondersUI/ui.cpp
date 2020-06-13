@@ -1297,7 +1297,11 @@ void UI::buttonCreateGamePressed() {
     if (serverProcess) {
         delete serverProcess;
     }
+#ifdef __linux__
+    QString serverExePath = Tools::createPath({"7WondersServer", "7WondersServer"});
+#else
     QString serverExePath = Tools::createPath({"..", "7WondersServer", "debug", "7WondersServer"});
+#endif
     std::cout << "server path: " << serverExePath.toStdString() << std::endl;
     serverProcess = new QProcess(this);
     serverProcess->start(serverExePath);
