@@ -63,6 +63,7 @@ private:
     Action action;
     TcpClient tcpclient;
     bool isGameOver;
+    int backGroundAlpha;
 
     QWidget * gameView;
     QWidget * menuView;

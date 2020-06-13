@@ -12,6 +12,7 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QThread>
+#include <QSizePolicy>
 
 
 UI::UI(QWidget * parent) : QMainWindow(parent),
@@ -19,6 +20,7 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     focusedCard(CardIdInvalid),
     tcpclient(this),
     isGameOver(false),
+    backGroundAlpha(0),
     serverProcess(nullptr) {
 
     if (tcpclient.connectServer("127.0.0.1")) {
@@ -38,14 +40,11 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     QObject::connect(&tcpclient, &TcpClient::gameOver, this, &UI::gameOver);
 
     this->resize(1300, 700);
-    this->setMinimumSize(1000, 600);
+    this->setMinimumSize(600, 400);
 
     menuView = new QWidget(this);
     choiceView = new QWidget(this);
     gameView = new QWidget(this);
-    menuView->resize(1300, 700);
-    choiceView->resize(1300, 700);
-    gameView->resize(1300, 700);
 
     // menu view
 
@@ -184,7 +183,7 @@ void UI::prepareMenu() {
     choiceView->hide();
     gameView->hide();
     setMouseTracking(false);
-    setBackground(30);
+    backGroundAlpha = 30;
 }
 
 
@@ -193,7 +192,7 @@ void UI::prepareChoice() {
     choiceView->show();
     gameView->hide();
     setMouseTracking(false);
-    setBackground(30);
+    backGroundAlpha = 30;
 }
 
 
@@ -203,7 +202,7 @@ void UI::prepareGame() {
     gameView->show();
     gameView->setMouseTracking(true);
     setMouseTracking(true);
-    setBackground(120);
+    backGroundAlpha = 120;
 }
 
 
@@ -888,6 +887,10 @@ void UI::getRectAndRotationFromPlayerPos(size_t playerPos, QRect & area, int & r
     if ( playerPos == 0 ) {
         int height = this->height() * 0.45;
         int width = height * areaRatio;
+        if (width > this->width() * 0.65) {
+            width = this->width() * 0.65;
+            height = width / areaRatio;
+        }
         int x = this->width() / 2 - width / 2;
         int y = this->height() - height;
         area = QRect(x, y, width, height);
@@ -1126,6 +1129,10 @@ QRect UI::rotatedScaledRect(const QRect & parentArea, int rotate, double percent
 
 void UI::paintEvent(QPaintEvent * event) {
     (void) event;
+    menuView->resize(this->size());
+    choiceView->resize(this->size());
+    gameView->resize(this->size());
+    setBackground(backGroundAlpha);
 
     resetShowedCards();
     resetShowedPlayers();
