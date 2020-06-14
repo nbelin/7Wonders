@@ -12,7 +12,8 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QThread>
-#include <QSizePolicy>
+#include <QDesktopServices>
+#include <QTemporaryFile>
 
 
 UI::UI(QWidget * parent) : QMainWindow(parent),
@@ -29,6 +30,9 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     }
 
     std::cout << "UI created" << std::endl;
+
+    AllCards::init();
+    AllWonders::init();
 
     QObject::connect(&tcpclient, &TcpClient::userMessage, this, &UI::userMessage);
     QObject::connect(&tcpclient, &TcpClient::setPlayerId, this, &UI::setPlayerId);
@@ -47,6 +51,15 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     gameView = new QWidget(this);
 
     // menu view
+
+    helpText = new QTextEdit(menuView);
+    helpText->setText("F1: quick rules (EN)\nF2: full rules (EN)\nF3: règles rapides (FR)\nF4: règles complètes (FR)");
+    helpText->setGeometry(100, 50, 170, 85);
+    QPalette palette;
+    palette.setColor(QPalette::Base, QColor(0, 0, 0, 180));
+    palette.setColor(QPalette::Text, Qt::white);
+    helpText->setPalette(palette);
+    helpText->setReadOnly(true);
 
     playerName = new QLineEdit(menuView);
     playerName->setPlaceholderText("player name");
@@ -73,10 +86,11 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     // choice view
 
     for ( size_t i=0; i<7; ++i ) {
-        QLineEdit * pl = new QLineEdit(choiceView);
-        pl->setReadOnly(true);
-        pl->setGeometry(500, 500 + i*25, 150, 20);
-        listPlayers.push_back(pl);
+        ChoicePlayer cp;
+        cp.name = new QLineEdit(choiceView);
+        cp.name->setReadOnly(true);
+        cp.name->setGeometry(500, 500 + i*25, 150, 20);
+        listPlayers.push_back(cp);
     }
 
     numberAIs = new QSpinBox(choiceView);
@@ -87,6 +101,27 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     choiceReady = new QCheckBox("ready", choiceView);
     choiceReady->setGeometry(500, 430, 60, 25);
     QObject::connect(choiceReady, &QCheckBox::stateChanged, this, &UI::choiceReadyChanged);
+
+    selectWonder = new QComboBox(choiceView);
+    selectWonder->setGeometry(300, 330, 250, 55);
+    selectWonder->setIconSize(QSize(100, 50));
+    selectWonder->setMaxVisibleItems(5);
+    selectWonder->addItem(QIcon(Tools::imageTokenPath("dice.png")), "random");
+    for (Wonder w : AllWonders::allWonders) {
+        selectWonder->addItem(QIcon(w.image), w.name);
+    }
+
+    randomWonders = new QCheckBox("ready", choiceView);
+    randomWonders->setGeometry(500, 430, 60, 25);
+    QObject::connect(randomWonders, &QCheckBox::stateChanged, this, &UI::randomWondersChanged);
+
+    randomFaces = new QCheckBox("ready", choiceView);
+    randomFaces->setGeometry(500, 430, 60, 25);
+    QObject::connect(randomFaces, &QCheckBox::stateChanged, this, &UI::randomFacesChanged);
+
+    randomPlaces = new QCheckBox("ready", choiceView);
+    randomPlaces->setGeometry(500, 430, 60, 25);
+    QObject::connect(randomPlaces, &QCheckBox::stateChanged, this, &UI::randomPlacesChanged);
 
     buttonAskStartGame = new QPushButton("Start game", choiceView);
     buttonAskStartGame->setGeometry(QRect(580, 450, 90, 30));
@@ -163,10 +198,6 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     imagesCardAge.push_back(new QPixmap(Tools::imageTokenPath("age1.png")));
     imagesCardAge.push_back(new QPixmap(Tools::imageTokenPath("age2.png")));
     imagesCardAge.push_back(new QPixmap(Tools::imageTokenPath("age3.png")));
-
-
-    AllCards::init();
-    AllWonders::init();
 }
 
 
@@ -238,7 +269,7 @@ void UI::setPlayerId(PlayerId playerId) {
 void UI::showListPlayers(const QStringList & players) {
     for (int i=0; i<players.size(); ++i) {
         std::cout << "set player name: " << players[i].toStdString() << std::endl;
-        listPlayers[i]->setText(players[i].mid(1));
+        listPlayers[i].name->setText(players[i].mid(1));
         //listPlayers[i]->setDisabled(players[i][0] == '1');
 
         QPalette palette;
@@ -248,13 +279,13 @@ void UI::showListPlayers(const QStringList & players) {
             palette.setColor(QPalette::Base, Qt::white);
         }
         //palette.setColor(QPalette::Text,Qt::white);
-        listPlayers[i]->setPalette(palette);
+        listPlayers[i].name->setPalette(palette);
     }
     for (size_t i=players.size(); i<7; ++i) {
-        listPlayers[i]->setText("");
+        listPlayers[i].name->setText("");
         QPalette palette;
         palette.setColor(QPalette::Base, Qt::white);
-        listPlayers[i]->setPalette(palette);
+        listPlayers[i].name->setPalette(palette);
     }
 }
 
@@ -1184,6 +1215,38 @@ void UI::mouseMoveEvent(QMouseEvent * event) {
 }
 
 
+void UI::keyPressEvent(QKeyEvent * event) {
+    QString pdf;
+    switch (event->key()) {
+    case Qt::Key_F1:
+        pdf = "7WONDERS_QUICKRULES_US_COLOR.pdf";
+        break;
+    case Qt::Key_F2:
+        pdf = "7WONDERS_RULES_US_COLOR.pdf";
+        break;
+    case Qt::Key_F3:
+        pdf = "7WONDERS_QUICKRULES_FR_COLOR.pdf";
+        break;
+    case Qt::Key_F4:
+        pdf = "7WONDERS_RULES_FR_COLOR.pdf";
+        break;
+    default:
+        return;
+    }
+    QString path = Tools::imagePath(pdf);
+    std::cout << "open: " << path.toStdString() << std::endl;
+    QTemporaryFile f(QDir::tempPath() + QDir::separator() + "XXXXXXX_" + pdf);
+    f.open();
+    f.close();
+    QFile(path).copy(f.fileName());
+    std::cout << "tmp file: " << f.fileName().toStdString() << std::endl;
+    if (! QDesktopServices::openUrl(f.fileName())) {
+        std::cout << "ERROR opening rules" << std::endl;
+    }
+    QThread::sleep(20);
+}
+
+
 void UI::buttonPlayPressed() {
     if (action.card == CardIdInvalid) {
         return;
@@ -1349,3 +1412,25 @@ void UI::numberAIsChanged(int value) {
 void UI::choiceReadyChanged(int state) {
     tcpclient.setPlayerReady(state > 0);
 }
+
+
+void UI::selectWonderChanged(int index) {
+    tcpclient.askWonder(index - 1);
+}
+
+
+void UI::randomWondersChanged(int state) {
+    tcpclient.setRandomWonders(state > 0);
+}
+
+
+void UI::randomFacesChanged(int state) {
+    tcpclient.setRandomFaces(state > 0);
+}
+
+
+void UI::randomPlacesChanged(int state) {
+    tcpclient.setRandomPlaces(state > 0);
+}
+
+

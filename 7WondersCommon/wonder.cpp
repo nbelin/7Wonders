@@ -275,7 +275,7 @@ void AllWonders::init() {
     workingCard.special = OneFreeCardFromDiscarded;
     stagesB.push_back(AllCards::addWonder(workingCard));
 
-    addWonder("Halikarnassus", baseIncome, stagesA, stagesB, "gizah.jpg", "halikarnassusA.png", "halikarnassusB.png");
+    addWonder("Halikarnassus", baseIncome, stagesA, stagesB, "halikarnassus.jpg", "halikarnassusA.png", "halikarnassusB.png");
 
 
     // Gizah

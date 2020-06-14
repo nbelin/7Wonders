@@ -9,9 +9,11 @@
 #include <QSpinBox>
 #include <QProcess>
 #include <QLineEdit>
+#include <QTextEdit>
 #include <QCheckBox>
 #include <QStringList>
 #include <QVector>
+#include <QComboBox>
 
 #include "boardview.hpp"
 #include "playerview.hpp"
@@ -52,6 +54,14 @@ private:
         QPushButton * reset;
     };
 
+    struct ChoicePlayer {
+        QLineEdit * name;
+        WonderId wonder;
+        WonderFace face;
+        QPushButton * up;
+        QPushButton * down;
+    };
+
     PlayerId playerId;
     PlayerId playerIdPointOfView;
     BoardView board;
@@ -65,22 +75,30 @@ private:
     bool isGameOver;
     int backGroundAlpha;
 
-    QWidget * gameView;
     QWidget * menuView;
     QWidget * choiceView;
+    QWidget * gameView;
     QProcess * serverProcess;
 
     // menu view
+    QTextEdit * helpText;
     QLineEdit * playerName;
     QLineEdit * remoteIpAddress;
     QPushButton * createGame;
     QPushButton * joinGame;
 
     // choice view
-    QVector<QLineEdit *> listPlayers;
+    QVector<ChoicePlayer> listPlayers;
     QSpinBox * numberAIs;
     QCheckBox * choiceReady;
+    QComboBox * selectWonder;
+    QCheckBox * randomWonders;
+    QCheckBox * randomFaces;
+    QCheckBox * randomPlaces;
     QPushButton * buttonAskStartGame;
+
+    // choice face view
+
 
     // game view
     QVector<ResourceToBuy> leftResourcesBought;
@@ -117,6 +135,7 @@ private:
     void paintEvent(QPaintEvent * event);
     void mousePressEvent(QMouseEvent * event);
     void mouseMoveEvent(QMouseEvent * event);
+    void keyPressEvent(QKeyEvent * event);
 
 signals:
 
@@ -144,6 +163,10 @@ public slots:
     void buttonAskStartGamePressed();
     void numberAIsChanged(int value);
     void choiceReadyChanged(int state);
+    void selectWonderChanged(int index);
+    void randomWondersChanged(int state);
+    void randomFacesChanged(int state);
+    void randomPlacesChanged(int state);
 };
 
 #endif // UI_H

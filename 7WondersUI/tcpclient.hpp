@@ -23,6 +23,10 @@ public:
     void setPlayerName(const char * name);
     void setNumberAIs(int value);
     void setPlayerReady(bool state);
+    void askWonder(WonderId wonder);
+    void setRandomWonders(bool state);
+    void setRandomFaces(bool state);
+    void setRandomPlaces(bool state);
     void askStartGame();
     void askAction(const Action & action);
 

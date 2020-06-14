@@ -102,6 +102,26 @@ void TcpClient::setPlayerReady(bool state) {
 }
 
 
+void TcpClient::askWonder(WonderId wonder) {
+    send(TcpCommon::encodeSingle(TcpCommon::askWonder, std::to_string(wonder).c_str()));
+}
+
+
+void TcpClient::setRandomWonders(bool state) {
+    send(TcpCommon::encodeSingle(TcpCommon::randomWonders, std::to_string(state).c_str()));
+}
+
+
+void TcpClient::setRandomFaces(bool state) {
+    send(TcpCommon::encodeSingle(TcpCommon::randomFaces, std::to_string(state).c_str()));
+}
+
+
+void TcpClient::setRandomPlaces(bool state) {
+    send(TcpCommon::encodeSingle(TcpCommon::randomPlaces, std::to_string(state).c_str()));
+}
+
+
 void TcpClient::askStartGame() {
     send(TcpCommon::encodeEmpty(TcpCommon::askGameStarts));
 }

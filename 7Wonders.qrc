@@ -56,5 +56,11 @@
         <file>images/wonders/rhodosA.png</file>
         <file>images/wonders/rhodosB.png</file>
         <file>images/welcome.png</file>
+        <file>images/tokens/dice.png</file>
+        <file>images/wonders/halikarnassus.jpg</file>
+        <file>images/7WONDERS_QUICKRULES_FR_COLOR.pdf</file>
+        <file>images/7WONDERS_QUICKRULES_US_COLOR.pdf</file>
+        <file>images/7WONDERS_RULES_FR_COLOR.pdf</file>
+        <file>images/7WONDERS_RULES_US_COLOR.pdf</file>
     </qresource>
 </RCC>
