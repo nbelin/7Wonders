@@ -1233,17 +1233,17 @@ void UI::keyPressEvent(QKeyEvent * event) {
     default:
         return;
     }
+
     QString path = Tools::imagePath(pdf);
-    std::cout << "open: " << path.toStdString() << std::endl;
-    QTemporaryFile f(QDir::tempPath() + QDir::separator() + "XXXXXXX_" + pdf);
-    f.open();
-    f.close();
-    QFile(path).copy(f.fileName());
-    std::cout << "tmp file: " << f.fileName().toStdString() << std::endl;
-    if (! QDesktopServices::openUrl(f.fileName())) {
-        std::cout << "ERROR opening rules" << std::endl;
+    QString tmpPath = QDir::tempPath() + "/tmp.4vr9firoxa-" + pdf; //add random string in filename to reduce the risk of removing a user file in case of bug
+    if (QFile::exists(tmpPath)) {
+        QFile(tmpPath).setPermissions(QFile::ReadOther | QFile::WriteOther);
+        QFile(tmpPath).remove();
     }
-    QThread::sleep(20);
+    QFile(path).copy(tmpPath);
+    if (! QDesktopServices::openUrl(tmpPath)) {
+        userMessage(QString("Error opening file: ") + tmpPath);
+    }
 }
 
 
