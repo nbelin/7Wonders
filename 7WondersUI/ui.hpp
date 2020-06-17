@@ -90,6 +90,7 @@ private:
     // choice view
     QVector<ChoicePlayer> listPlayers;
     QSpinBox * numberAIs;
+    QLineEdit * numberAIsText;
     QCheckBox * choiceReady;
     QComboBox * selectWonder;
     QCheckBox * randomWonders;

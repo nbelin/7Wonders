@@ -53,13 +53,18 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     // menu view
 
     helpText = new QTextEdit(menuView);
-    helpText->setText("F1: quick rules (EN)\nF2: full rules (EN)\nF3: règles rapides (FR)\nF4: règles complètes (FR)");
-    helpText->setGeometry(100, 50, 170, 85);
+    helpText->setFontPointSize(13);
+    helpText->setPlainText("F1: quick rules (EN)\nF2: full rules (EN)\nF3: règles rapides (FR)\nF4: règles complètes (FR)");
+    helpText->setGeometry(100, 50, 0, 0);
     QPalette palette;
     palette.setColor(QPalette::Base, QColor(0, 0, 0, 180));
     palette.setColor(QPalette::Text, Qt::white);
     helpText->setPalette(palette);
     helpText->setReadOnly(true);
+    helpText->document()->adjustSize();
+    helpText->setFixedSize(helpText->document()->size().toSize() + QSize(15, 5));
+    helpText->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    helpText->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     playerName = new QLineEdit(menuView);
     playerName->setPlaceholderText("player name");
@@ -95,8 +100,17 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
 
     numberAIs = new QSpinBox(choiceView);
     numberAIs->setRange(0, 7);
-    numberAIs->setGeometry(500, 460, 35, 25);
+    numberAIs->setGeometry(400, 460, 35, 25);
     QObject::connect(numberAIs, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &UI::numberAIsChanged);
+
+    numberAIsText = new QLineEdit(choiceView);
+    numberAIsText->setText("number of AIs");
+    numberAIsText->setGeometry(440, 460, 100, 20);
+    numberAIsText->setReadOnly(true);
+    numberAIsText->setFrame(false);
+    palette.setColor(QPalette::Base, QColor(0, 0, 0, 0));
+    palette.setColor(QPalette::Text, Qt::black);
+    numberAIsText->setPalette(palette);
 
     choiceReady = new QCheckBox("ready", choiceView);
     choiceReady->setGeometry(500, 430, 60, 25);
@@ -111,16 +125,16 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
         selectWonder->addItem(QIcon(w.image), w.name);
     }
 
-    randomWonders = new QCheckBox("ready", choiceView);
-    randomWonders->setGeometry(500, 430, 60, 25);
+    randomWonders = new QCheckBox("wonders: all random", choiceView);
+    randomWonders->setGeometry(400, 330, 100, 25);
     QObject::connect(randomWonders, &QCheckBox::stateChanged, this, &UI::randomWondersChanged);
 
-    randomFaces = new QCheckBox("ready", choiceView);
-    randomFaces->setGeometry(500, 430, 60, 25);
+    randomFaces = new QCheckBox("faces: all random", choiceView);
+    randomFaces->setGeometry(500, 330, 100, 25);
     QObject::connect(randomFaces, &QCheckBox::stateChanged, this, &UI::randomFacesChanged);
 
-    randomPlaces = new QCheckBox("ready", choiceView);
-    randomPlaces->setGeometry(500, 430, 60, 25);
+    randomPlaces = new QCheckBox("places: all random", choiceView);
+    randomPlaces->setGeometry(600, 330, 100, 25);
     QObject::connect(randomPlaces, &QCheckBox::stateChanged, this, &UI::randomPlacesChanged);
 
     buttonAskStartGame = new QPushButton("Start game", choiceView);
@@ -223,7 +237,7 @@ void UI::prepareChoice() {
     choiceView->show();
     gameView->hide();
     setMouseTracking(false);
-    backGroundAlpha = 30;
+    backGroundAlpha = 60;
 }
 
 
