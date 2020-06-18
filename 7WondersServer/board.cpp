@@ -3,6 +3,7 @@
 #include "ai.hpp"
 #include "boardview.hpp"
 #include "playerview.hpp"
+#include "choice.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -24,12 +25,21 @@ Board::Board(QObject *parent, bool fake) : QObject(parent), tcpserver(this) {
     state.currentRound = 0;
     state.currentAge = 0;
     state.status = StatusWaitingReady;
+    randomWonders = false;
+    randomFaces = false;
+    randomPlaces = false;
 
     random = std::default_random_engine(QTime::currentTime().msecsSinceStartOfDay());
 
     QObject::connect(&tcpserver, &TcpServer::addPlayerName, this, &Board::addPlayerName);
     QObject::connect(&tcpserver, &TcpServer::setNumberAIs, this, &Board::setNumberAIs);
     QObject::connect(&tcpserver, &TcpServer::setPlayerReady, this, &Board::setPlayerReady);
+    QObject::connect(&tcpserver, &TcpServer::askWonder, this, &Board::askWonder);
+    QObject::connect(&tcpserver, &TcpServer::movePlayerUp, this, &Board::movePlayerUp);
+    QObject::connect(&tcpserver, &TcpServer::movePlayerDown, this, &Board::movePlayerDown);
+    QObject::connect(&tcpserver, &TcpServer::setRandomWonders, this, &Board::setRandomWonders);
+    QObject::connect(&tcpserver, &TcpServer::setRandomFaces, this, &Board::setRandomFaces);
+    QObject::connect(&tcpserver, &TcpServer::setRandomPlaces, this, &Board::setRandomPlaces);
     QObject::connect(&tcpserver, &TcpServer::askStartGame, this, &Board::askStartGame);
     QObject::connect(&tcpserver, &TcpServer::askAction, this, &Board::askAction);
 
@@ -68,9 +78,10 @@ void Board::addPlayerName(const QTcpSocket * socket, const char * name) {
         tcpserver.sendDebug("already started...");
         return;
     }
+
     Player * player = new Human(this, name);
     tcpserver.setPlayerId(socket, player->view.id);
-    tcpserver.sendListPlayers(getListPlayers(true));
+    showChoice();
 }
 
 
@@ -79,24 +90,130 @@ void Board::setNumberAIs(int number) {
         tcpserver.sendDebug("already started...");
         return;
     }
+
+    if (number > state.nbAIs) {
+        for (int i=state.nbAIs; i<number; ++i) {
+            QString name = QString("[AI ") + QString::number(i) + QString("]");
+            new AI(this, name.toStdString().c_str());
+        }
+    }
+
+    if (number < state.nbAIs) {
+        for (int i=number; i<state.nbAIs; ++i) {
+            QString name = QString("[AI ") + QString::number(i) + QString("]");
+            for (Player * p : state.players) {
+                if (p->view.name == name) {
+                    removePlayer(p);
+                }
+            }
+        }
+    }
+
     state.nbAIs = number;
-    tcpserver.sendListPlayers(getListPlayers(true));
-    gameProcess();
+    showChoice();
 }
 
 
-void Board::setPlayerReady(PlayerId playerId, int ready) {
+void Board::setPlayerReady(PlayerId playerId, bool ready) {
     if (state.status != StatusWaitingReady) {
         tcpserver.sendDebug("already started...");
         return;
     }
+
     Player * player = getPlayer(playerId, 0);
     if (ready) {
         player->status = StatusReady;
     } else {
         player->status = StatusNotReady;
     }
-    tcpserver.sendListPlayers(getListPlayers(true));
+    showChoice();
+}
+
+
+void Board::askWonder(PlayerId playerId, WonderId wonderId) {
+    if (state.status != StatusWaitingReady) {
+        tcpserver.sendDebug("already started...");
+        return;
+    }
+
+    if (wonderId == WonderIdInvalid) {
+        getPlayer(playerId)->setWonder(wonderId);
+        showChoice();
+        return;
+    }
+
+    for (const Player * p : state.players) {
+        if (p->view.id != playerId && p->view.wonderId == wonderId) {
+            return;
+        }
+    }
+    getPlayer(playerId)->setWonder(wonderId);
+    showChoice();
+}
+
+
+void Board::movePlayerUp(int index) {
+    if (state.status != StatusWaitingReady) {
+        tcpserver.sendDebug("already started...");
+        return;
+    }
+
+    if (index < 1 || index > state.players.size() - 1) {
+        return;
+    }
+    Player * tmp = state.players[index];
+    state.players[index] = state.players[index - 1];
+    state.players[index - 1] = tmp;
+    showChoice();
+}
+
+
+void Board::movePlayerDown(int index) {
+    if (state.status != StatusWaitingReady) {
+        tcpserver.sendDebug("already started...");
+        return;
+    }
+
+    if (index < 0 || index > state.players.size() - 2) {
+        return;
+    }
+    Player * tmp = state.players[index];
+    state.players[index] = state.players[index + 1];
+    state.players[index + 1] = tmp;
+    showChoice();
+}
+
+
+void Board::setRandomWonders(bool value) {
+    if (state.status != StatusWaitingReady) {
+        tcpserver.sendDebug("already started...");
+        return;
+    }
+
+    randomWonders = value;
+    showChoice();
+}
+
+
+void Board::setRandomFaces(bool value) {
+    if (state.status != StatusWaitingReady) {
+        tcpserver.sendDebug("already started...");
+        return;
+    }
+
+    randomFaces = value;
+    showChoice();
+}
+
+
+void Board::setRandomPlaces(bool value) {
+    if (state.status != StatusWaitingReady) {
+        tcpserver.sendDebug("already started...");
+        return;
+    }
+
+    randomPlaces = value;
+    showChoice();
 }
 
 
@@ -129,14 +246,11 @@ void Board::askStartGame() {
         tcpserver.sendDebug("not all players ready...");
         return;
     }
-    if (state.nbPlayers + state.nbAIs < 3) {
+    if (state.nbPlayers < 3) {
+        tcpserver.sendDebug("not enough players...");
         return;
     }
     tcpserver.sendDebug("game starts!");
-    const QStringList & listAIs = getListAIs();
-    for (const QString & ai : listAIs) {
-        new AI(this, ai.toStdString().c_str());
-    }
 
     initAllWonders();
     initAllCards();
@@ -670,6 +784,23 @@ bool Board::isValidActionCopyGuild(PlayerId playerId, const Action & action, QSt
 }
 
 
+void Board::showChoice() {
+    Choice choice;
+    for (const Player * player : state.players) {
+        Choice::PlayerChoice p;
+        p.name = player->view.name;
+        p.wonderId = player->view.wonderId;
+        p.ready = player->status == StatusReady;
+        choice.players.append(p);
+    }
+    choice.numberAIs = state.nbAIs;
+    choice.randomWonders = randomWonders;
+    choice.randomFaces = randomFaces;
+    choice.randomPlaces = randomPlaces;
+    tcpserver.showChoice(choice);
+}
+
+
 BoardView Board::toBoardView() {
     BoardView bv;
 
@@ -693,9 +824,6 @@ Board::BoardState Board::saveBoardState() const {
 
 void Board::restoreFakeBoardState(const Board::BoardState & state_) {
     state = state_;
-    for (Player * p : state_.players) {
-        //std::cout << "old player: " << p->view.id << std::endl;
-    }
     state.players.clear();
     for (const Player * player : state_.players) {
         Player * newPlayer = new FakePlayer(this, "");
@@ -714,10 +842,6 @@ void Board::restoreFakeBoardState(const Board::BoardState & state_) {
         newPlayer->canPlayCardForFreeAlreadyUsed = player->canPlayCardForFreeAlreadyUsed;
         newPlayer->canPlayCardFromDiscarded = player->canPlayCardFromDiscarded;
     }
-    for (Player * p : state.players) {
-        //std::cout << "new player: " << p->view.id << std::endl;
-    }
-    //std::cout << "restored board: " << this << std::endl;
 }
 
 
@@ -872,38 +996,6 @@ void Board::discardRemainingCardsForAge(Age a) {
     for (CardsByPlayer & cards : state.remainingCards[a-1]) {
         cards.clear();
     }
-}
-
-
-QStringList Board::getListPlayers(bool withReady) {
-    QStringList res;
-    for (Player * player : state.players) {
-        if (withReady) {
-            res.append(QString::number(int(player->status == StatusReady)) + player->view.name);
-        } else {
-            res.append(player->view.name);
-        }
-    }
-    res.append(getListAIs(withReady));
-    return res;
-}
-
-
-QStringList Board::getListAIs(bool withReady) {
-    size_t remainingPlaces = 7 - state.nbPlayers;
-    size_t realNbAIs = state.nbAIs;
-    if (realNbAIs > remainingPlaces) {
-        realNbAIs = remainingPlaces;
-    }
-    QStringList res;
-    for (size_t i=0; i<realNbAIs; ++i) {
-        if (withReady) {
-            res.append(QString("1[AI ") + QString::number(i+1) + "]");
-        } else {
-            res.append(QString("[AI ") + QString::number(i+1) + "]");
-        }
-    }
-    return res;
 }
 
 

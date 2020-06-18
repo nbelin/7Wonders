@@ -78,7 +78,13 @@ signals:
 public slots:
     void addPlayerName(const QTcpSocket * socket, const char * name);
     void setNumberAIs(int number);
-    void setPlayerReady(PlayerId playerId, int ready);
+    void setPlayerReady(PlayerId playerId, bool ready);
+    void askWonder(PlayerId playerId, WonderId wonderId);
+    void movePlayerUp(int index);
+    void movePlayerDown(int index);
+    void setRandomWonders(bool value);
+    void setRandomFaces(bool value);
+    void setRandomPlaces(bool value);
     void askStartGame();
     void askAction(PlayerId playerId, const Action & action);
 
@@ -98,6 +104,7 @@ private:
     bool isValidActionFromDiscarded(PlayerId playerId, const Action & action, QString & optMessage);
     bool isValidActionFreeCard(PlayerId playerId, const Action & action, QString & optMessage);
     bool isValidActionCopyGuild(PlayerId playerId, const Action & action, QString & optMessage);
+    void showChoice();
 
 public:
     size_t getPlayerArrayId(PlayerId playerId) const;
@@ -109,8 +116,6 @@ public:
     QVector<CardId> & getCardsByAgeRoundPlayer(Age a, int round, PlayerId p);
     void removeCardForAgeRoundPlayer(CardId cardId, Age a, int round, PlayerId p);
     void discardRemainingCardsForAge(Age a);
-    QStringList getListPlayers(bool withReady=false);
-    QStringList getListAIs(bool withReady=false);
     void setAllPlayers(StatusPlayer status);
     bool areAllPlayers(StatusPlayer status);
     bool areAllPlayersNot(StatusPlayer status);
@@ -124,6 +129,9 @@ public:
     BoardState state;
     TcpServer tcpserver;
     QTimer * timer;
+    bool randomWonders;
+    bool randomFaces;
+    bool randomPlaces;
 
     std::default_random_engine random;
 };

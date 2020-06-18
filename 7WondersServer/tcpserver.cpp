@@ -25,8 +25,8 @@ void TcpServer::setPlayerId(const QTcpSocket * socket, PlayerId playerId) {
 }
 
 
-void TcpServer::sendListPlayers(const QStringList & strList) {
-    sendAll(TcpCommon::encodeMulti(TcpCommon::listPlayers, strList));
+void TcpServer::showChoice(const Choice & choice) {
+    sendAll(TcpCommon::encodeSingle(TcpCommon::showChoice, choice.toString()));
 }
 
 
@@ -103,7 +103,7 @@ void TcpServer::socketStateChanged(QAbstractSocket::SocketState socketState)
 {
     if (socketState == QAbstractSocket::UnconnectedState)
     {
-        QTcpSocket * sender = static_cast<QTcpSocket*>(QObject::sender());
+        //QTcpSocket * sender = static_cast<QTcpSocket*>(QObject::sender());
         //playerSockets.removeOne(getPlayerSocket(sender));
     }
 }
@@ -113,9 +113,7 @@ void TcpServer::readyRead()
 {
     QTcpSocket * sender = static_cast<QTcpSocket*>(QObject::sender());
     QByteArray datas = sender->readAll();
-    //sendAll(QString("first test"));
     sendAll(datas);
-    //sendDebug("decode messages");
 
     QStringList messages = TcpCommon::decodeMessages(datas);
     sendDebug(std::to_string(messages.size()).c_str());
@@ -132,6 +130,18 @@ void TcpServer::readyRead()
             parseNumberAIs(sender, args);
         } else if (keyword == TcpCommon::playerReady) {
             parsePlayerReady(sender, args);
+        } else if (keyword == TcpCommon::askWonder) {
+            parseAskWonder(sender, args);
+        } else if (keyword == TcpCommon::movePlayerUp) {
+            parseMovePlayerUp(sender, args);
+        } else if (keyword == TcpCommon::movePlayerDown) {
+            parseMovePlayerDown(sender, args);
+        } else if (keyword == TcpCommon::randomWonders) {
+            parseRandomWonders(sender, args);
+        } else if (keyword == TcpCommon::randomFaces) {
+            parseRandomFaces(sender, args);
+        } else if (keyword == TcpCommon::randomPlaces) {
+            parseRandomPlaces(sender, args);
         } else if (keyword == TcpCommon::askGameStarts) {
             parseAskGameStarts(sender, args);
         } else if (keyword == TcpCommon::askAction) {
@@ -195,6 +205,7 @@ void TcpServer::parsePlayerName(const QTcpSocket * socket, const QStringList & a
 
 
 void TcpServer::parseNumberAIs(const QTcpSocket * socket, const QStringList & args) {
+    (void) socket;
     if (args.size() != 1) {
         return;
     }
@@ -212,7 +223,63 @@ void TcpServer::parsePlayerReady(const QTcpSocket * socket, const QStringList & 
 }
 
 
+void TcpServer::parseAskWonder(const QTcpSocket * socket, const QStringList & args) {
+    if (args.size() != 1) {
+        return;
+    }
+    askWonder(getConnectedPlayer(socket), args[0].toInt());
+}
+
+
+void TcpServer::parseMovePlayerUp(const QTcpSocket * socket, const QStringList & args) {
+    (void) socket;
+    if (args.size() != 1) {
+        return;
+    }
+    movePlayerUp(args[0].toInt());
+}
+
+
+void TcpServer::parseMovePlayerDown(const QTcpSocket * socket, const QStringList & args) {
+    (void) socket;
+    if (args.size() != 1) {
+        return;
+    }
+    movePlayerDown(args[0].toInt());
+}
+
+
+void TcpServer::parseRandomWonders(const QTcpSocket * socket, const QStringList & args) {
+    (void) socket;
+    if (args.size() != 1) {
+        return;
+    }
+    setRandomWonders(args[0].toInt());
+}
+
+
+void TcpServer::parseRandomFaces(const QTcpSocket * socket, const QStringList & args) {
+    (void) socket;
+    if (args.size() != 1) {
+        return;
+    }
+    setRandomFaces(args[0].toInt());
+}
+
+
+void TcpServer::parseRandomPlaces(const QTcpSocket * socket, const QStringList & args) {
+    (void) socket;
+    if (args.size() != 1) {
+        return;
+    }
+    setRandomPlaces(args[0].toInt());
+}
+
+
+
+
 void TcpServer::parseAskGameStarts(const QTcpSocket * socket, const QStringList & args) {
+    (void) socket;
     if (args.size() != 0) {
         return;
     }

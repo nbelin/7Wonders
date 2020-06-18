@@ -9,7 +9,7 @@
 
 
 typedef int WonderId;
-const CardId WonderIdInvalid = -1;
+const CardId WonderIdInvalid = 0;
 typedef int MilitaryPoints;
 
 enum WonderFace {

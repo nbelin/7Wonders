@@ -45,6 +45,10 @@ void AllWonders::init() {
     Resource baseIncome;
 
 
+    // Invalid Wonder
+    addWonder("Invalid", baseIncome, stagesA, stagesB, "", "", "");
+
+
     // Rhodos
     baseIncome = Resource(Resource::ONE_ORE);
     stagesA.clear();

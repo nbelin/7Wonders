@@ -14,6 +14,7 @@ win32:CONFIG += staticlib
 
 SOURCES += \
     action.cpp \
+    choice.cpp \
     resource.cpp \
     card.cpp \
     wonder.cpp \
@@ -25,6 +26,7 @@ SOURCES += \
 
 HEADERS +=\
     action.hpp \
+    choice.hpp \
     resource.hpp \
     card.hpp \
     wonder.hpp \

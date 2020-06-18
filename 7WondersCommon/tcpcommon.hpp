@@ -16,10 +16,12 @@ public:
     static constexpr const char * numberAIs = "NUMBER_AIS";
     static constexpr const char * playerReady = "PLAYER_READY";
     static constexpr const char * askWonder = "ASK_WONDER";
+    static constexpr const char * movePlayerUp = "MOVE_PLAYER_UP";
+    static constexpr const char * movePlayerDown = "MOVE_PLAYER_DOWN";
     static constexpr const char * randomWonders = "RANDOM_WONDERS";
     static constexpr const char * randomFaces = "RANDOM_FACES";
     static constexpr const char * randomPlaces = "RANDOM_PLACES";
-    static constexpr const char * listPlayers = "LIST_PLAYERS";
+    static constexpr const char * showChoice = "SHOW_CHOICE";
     static constexpr const char * askGameStarts = "ASK_GAME_STARTS";
     static constexpr const char * gameStarts = "GAME_STARTS";
     static constexpr const char * showBoard = "SHOW_BOARD";

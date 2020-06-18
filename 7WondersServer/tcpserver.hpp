@@ -10,6 +10,7 @@
 #include "card.hpp"
 #include "boardview.hpp"
 #include "action.hpp"
+#include "choice.hpp"
 
 typedef int PlayerId;
 
@@ -20,7 +21,7 @@ public:
     explicit TcpServer(QObject *parent = 0);
     void sendDebug(const QString & message);
     void setPlayerId(const QTcpSocket * socket, PlayerId playerId);
-    void sendListPlayers(const QStringList & strList);
+    void showChoice(const Choice & choice);
     void startGame();
     void showBoard(const BoardView & boardView);
     void showBoardToPlayer(PlayerId playerId, const BoardView & boardView);
@@ -35,6 +36,12 @@ signals:
     void addPlayerName(const QTcpSocket * socket, const char * name);
     void setNumberAIs(int number);
     void setPlayerReady(PlayerId playerId, int ready);
+    void askWonder(PlayerId playerId, WonderId wonderId);
+    void movePlayerUp(int index);
+    void movePlayerDown(int index);
+    void setRandomWonders(bool value);
+    void setRandomFaces(bool value);
+    void setRandomPlaces(bool value);
     void askStartGame();
     void askAction(PlayerId playerId, const Action & action);
 
@@ -63,6 +70,12 @@ private:
     void parsePlayerName(const QTcpSocket * socket, const QStringList & args);
     void parseNumberAIs(const QTcpSocket * socket, const QStringList & args);
     void parsePlayerReady(const QTcpSocket * socket, const QStringList & args);
+    void parseAskWonder(const QTcpSocket * socket, const QStringList & args);
+    void parseMovePlayerUp(const QTcpSocket * socket, const QStringList & args);
+    void parseMovePlayerDown(const QTcpSocket * socket, const QStringList & args);
+    void parseRandomWonders(const QTcpSocket * socket, const QStringList & args);
+    void parseRandomFaces(const QTcpSocket * socket, const QStringList & args);
+    void parseRandomPlaces(const QTcpSocket * socket, const QStringList & args);
     void parseAskGameStarts(const QTcpSocket * socket, const QStringList & args);
     void parseAskAction(const QTcpSocket * socket, const QStringList & args);
 };

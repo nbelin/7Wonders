@@ -36,7 +36,7 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
 
     QObject::connect(&tcpclient, &TcpClient::userMessage, this, &UI::userMessage);
     QObject::connect(&tcpclient, &TcpClient::setPlayerId, this, &UI::setPlayerId);
-    QObject::connect(&tcpclient, &TcpClient::showListPlayers, this, &UI::showListPlayers);
+    QObject::connect(&tcpclient, &TcpClient::showChoice, this, &UI::showChoice);
     QObject::connect(&tcpclient, &TcpClient::startGame, this, &UI::startGame);
     QObject::connect(&tcpclient, &TcpClient::showBoard, this, &UI::showBoard);
     QObject::connect(&tcpclient, &TcpClient::showCardsToPlay, this, &UI::showCardsToPlay);
@@ -92,9 +92,26 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
 
     for ( size_t i=0; i<7; ++i ) {
         ChoicePlayer cp;
+
         cp.name = new QLineEdit(choiceView);
         cp.name->setReadOnly(true);
-        cp.name->setGeometry(500, 500 + i*25, 150, 20);
+        cp.name->setGeometry(500, 500 + i*50, 150, 20);
+
+        cp.wonder = new QLabel(choiceView);
+        cp.wonder->setGeometry(660, 500 + i*50, 60, 40);
+
+        cp.up = new QPushButton(choiceView);
+        cp.up->setFlat(true);
+        cp.up->setIcon(QIcon(Tools::imageTokenPath("up.png")));
+        cp.up->setGeometry(740, 500 + i*50, 10, 10);
+        QObject::connect(cp.up, &QPushButton::released, this, [this, i]{ movePlayerUp(i); });
+
+        cp.down = new QPushButton(choiceView);
+        cp.down->setFlat(true);
+        cp.down->setIcon(QIcon(Tools::imageTokenPath("down.png")));
+        cp.down->setGeometry(740, 510 + i*50, 10, 10);
+        QObject::connect(cp.down, &QPushButton::released, this, [this, i]{ movePlayerDown(i); });
+
         listPlayers.push_back(cp);
     }
 
@@ -120,10 +137,14 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     selectWonder->setGeometry(300, 330, 250, 55);
     selectWonder->setIconSize(QSize(100, 50));
     selectWonder->setMaxVisibleItems(5);
-    selectWonder->addItem(QIcon(Tools::imageTokenPath("dice.png")), "random");
     for (Wonder w : AllWonders::allWonders) {
-        selectWonder->addItem(QIcon(w.image), w.name);
+        if (w.id == WonderIdInvalid) {
+            selectWonder->addItem(QIcon(Tools::imageTokenPath("dice.png")), "random");
+        } else {
+            selectWonder->addItem(QIcon(w.image), w.name);
+        }
     }
+    QObject::connect(selectWonder, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &UI::selectWonderChanged);
 
     randomWonders = new QCheckBox("wonders: all random", choiceView);
     randomWonders->setGeometry(400, 330, 100, 25);
@@ -280,27 +301,53 @@ void UI::setPlayerId(PlayerId playerId) {
 }
 
 
-void UI::showListPlayers(const QStringList & players) {
-    for (int i=0; i<players.size(); ++i) {
-        std::cout << "set player name: " << players[i].toStdString() << std::endl;
-        listPlayers[i].name->setText(players[i].mid(1));
-        //listPlayers[i]->setDisabled(players[i][0] == '1');
+void UI::showChoice(const Choice & choice) {
+    for (int i=0; i<listPlayers.size(); ++i) {
+        if (i < choice.players.size()) {
+            const Choice::PlayerChoice & pc = choice.players[i];
 
-        QPalette palette;
-        if (players[i][0] == '1') {
-            palette.setColor(QPalette::Base, Qt::gray);
+            listPlayers[i].name->setText(pc.name);
+            QPalette palette;
+            if (pc.ready) {
+                palette.setColor(QPalette::Base, Qt::gray);
+            } else {
+                palette.setColor(QPalette::Base, Qt::white);
+            }
+            listPlayers[i].name->setPalette(palette);
+
+            QPixmap pixmap;
+            if (pc.wonderId == WonderIdInvalid) {
+                pixmap.load(Tools::imageTokenPath("dice.png"));
+            } else {
+                const Wonder & wonder = AllWonders::getWonder(pc.wonderId);
+                pixmap.load(wonder.image);
+            }
+            listPlayers[i].wonder->setPixmap(pixmap.scaled(listPlayers[i].wonder->size(), Qt::KeepAspectRatio));
         } else {
+            listPlayers[i].name->setText("");
+            QPalette palette;
             palette.setColor(QPalette::Base, Qt::white);
+            listPlayers[i].name->setPalette(palette);
+
+            listPlayers[i].wonder->clear();
         }
-        //palette.setColor(QPalette::Text,Qt::white);
-        listPlayers[i].name->setPalette(palette);
     }
-    for (size_t i=players.size(); i<7; ++i) {
-        listPlayers[i].name->setText("");
-        QPalette palette;
-        palette.setColor(QPalette::Base, Qt::white);
-        listPlayers[i].name->setPalette(palette);
-    }
+
+    numberAIs->blockSignals(true);
+    numberAIs->setValue(choice.numberAIs);
+    numberAIs->blockSignals(false);
+
+    randomWonders->blockSignals(true);
+    randomWonders->setChecked(choice.randomWonders);
+    randomWonders->blockSignals(false);
+
+    randomFaces->blockSignals(true);
+    randomFaces->setChecked(choice.randomFaces);
+    randomFaces->blockSignals(false);
+
+    randomPlaces->blockSignals(true);
+    randomPlaces->setChecked(choice.randomPlaces);
+    randomPlaces->blockSignals(false);
 }
 
 
@@ -1429,7 +1476,17 @@ void UI::choiceReadyChanged(int state) {
 
 
 void UI::selectWonderChanged(int index) {
-    tcpclient.askWonder(index - 1);
+    tcpclient.askWonder(index);
+}
+
+
+void UI::movePlayerUp(int index) {
+    tcpclient.movePlayerUp(index);
+}
+
+
+void UI::movePlayerDown(int index) {
+    tcpclient.movePlayerDown(index);
 }
 
 

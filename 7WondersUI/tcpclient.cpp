@@ -60,8 +60,8 @@ void TcpClient::readyRead() {
 
         if (keyword == TcpCommon::playerId) {
             parsePlayerId(args);
-        } else if (keyword == TcpCommon::listPlayers) {
-            parseListPlayers(args);
+        } else if (keyword == TcpCommon::showChoice) {
+            parseShowChoice(args);
         } else if (keyword == TcpCommon::gameStarts) {
             parseStartGame(args);
         } else if (keyword == TcpCommon::showBoard) {
@@ -107,6 +107,16 @@ void TcpClient::askWonder(WonderId wonder) {
 }
 
 
+void TcpClient::movePlayerUp(int index) {
+    send(TcpCommon::encodeSingle(TcpCommon::movePlayerUp, std::to_string(index).c_str()));
+}
+
+
+void TcpClient::movePlayerDown(int index) {
+    send(TcpCommon::encodeSingle(TcpCommon::movePlayerDown, std::to_string(index).c_str()));
+}
+
+
 void TcpClient::setRandomWonders(bool state) {
     send(TcpCommon::encodeSingle(TcpCommon::randomWonders, std::to_string(state).c_str()));
 }
@@ -140,9 +150,13 @@ void TcpClient::parsePlayerId(const QStringList & args) {
 }
 
 
-void TcpClient::parseListPlayers(const QStringList & args) {
-    std::cout << "list players: " << args.size() << std::endl;
-    showListPlayers(args);
+void TcpClient::parseShowChoice(const QStringList & args) {
+    if (args.size() != 1) {
+        return;
+    }
+    Choice choice;
+    choice.fromString(args[0]);
+    showChoice(choice);
 }
 
 

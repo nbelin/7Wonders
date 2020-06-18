@@ -5,6 +5,7 @@
 
 AI::AI(Board * board, const char * name) : Player(board, name) {
     fakeBoard = new Board(nullptr, true);
+    status = StatusReady;
 }
 
 

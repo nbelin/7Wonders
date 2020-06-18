@@ -14,12 +14,14 @@
 #include <QStringList>
 #include <QVector>
 #include <QComboBox>
+#include <QLabel>
 
 #include "boardview.hpp"
 #include "playerview.hpp"
 #include "tcpclient.hpp"
 #include <card.hpp>
 #include <action.hpp>
+#include "choice.hpp"
 
 class UI : public QMainWindow {
     Q_OBJECT
@@ -56,8 +58,7 @@ private:
 
     struct ChoicePlayer {
         QLineEdit * name;
-        WonderId wonder;
-        WonderFace face;
+        QLabel * wonder;
         QPushButton * up;
         QPushButton * down;
     };
@@ -143,7 +144,7 @@ signals:
 public slots:
     void userMessage(const QString & message);
     void setPlayerId(PlayerId playerId);
-    void showListPlayers(const QStringList & players);
+    void showChoice(const Choice & choice);
     void showBoard(const QString & boardString);
     void showCardsToPlay(int possibleActions, const QVector<CardId> & cards);
     void confirmAction(bool valid, const QString & optMessage);
@@ -165,6 +166,8 @@ public slots:
     void numberAIsChanged(int value);
     void choiceReadyChanged(int state);
     void selectWonderChanged(int index);
+    void movePlayerUp(int index);
+    void movePlayerDown(int index);
     void randomWondersChanged(int state);
     void randomFacesChanged(int state);
     void randomPlacesChanged(int state);

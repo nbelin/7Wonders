@@ -9,6 +9,7 @@
 #include "card.hpp"
 #include "playerview.hpp"
 #include "action.hpp"
+#include "choice.hpp"
 
 class TcpClient : public QObject
 {
@@ -24,6 +25,8 @@ public:
     void setNumberAIs(int value);
     void setPlayerReady(bool state);
     void askWonder(WonderId wonder);
+    void movePlayerUp(int index);
+    void movePlayerDown(int index);
     void setRandomWonders(bool state);
     void setRandomFaces(bool state);
     void setRandomPlaces(bool state);
@@ -32,7 +35,7 @@ public:
 
 signals:
     void setPlayerId(PlayerId playerId);
-    void showListPlayers(const QStringList & players);
+    void showChoice(const Choice & choice);
     void startGame();
     void showBoard(const QString & boardString);
     void showCardsToPlay(int possibleActions, const QVector<CardId> & cards);
@@ -49,7 +52,7 @@ private:
     void send(const QString & message);
 
     void parsePlayerId(const QStringList & args);
-    void parseListPlayers(const QStringList & args);
+    void parseShowChoice(const QStringList & args);
     void parseStartGame(const QStringList & args);
     void parseShowBoard(const QStringList & args);
     void parseCardsToPlay(const QStringList & args);
