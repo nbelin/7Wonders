@@ -856,12 +856,21 @@ void Board::playSingleAction(PlayerId playerId, Action & action) {
 void Board::initAllWonders() {
     QVector<WonderId> listWonders;
     for (const Wonder & wonder : AllWonders::allWonders) {
-        std::cout << "wonder : " << wonder.id << wonder.name.toStdString() << std::endl;
-        listWonders.append(wonder.id);
+        if (wonder.id != WonderIdInvalid) {
+            std::cout << "wonder : " << wonder.id << wonder.name.toStdString() << std::endl;
+            listWonders.append(wonder.id);
+        }
     }
     std::shuffle(std::begin(listWonders), std::end(listWonders), random);
-    for ( int i=0; i<state.nbPlayers; ++i ) {
-        state.players[i]->setWonder(listWonders[i]);
+    for ( Player * p : state.players ) {
+        if (p->view.wonderId != WonderIdInvalid) {
+            listWonders.removeOne(p->view.wonderId);
+        }
+    }
+    for ( Player * p : state.players ) {
+        if (p->view.wonderId == WonderIdInvalid) {
+            p->setWonder(listWonders.takeLast());
+        }
     }
 }
 
