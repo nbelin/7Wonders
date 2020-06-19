@@ -62,6 +62,8 @@ void TcpClient::readyRead() {
             parsePlayerId(args);
         } else if (keyword == TcpCommon::showChoice) {
             parseShowChoice(args);
+        } else if (keyword == TcpCommon::showChoiceFace) {
+            parseShowChoiceFace(args);
         } else if (keyword == TcpCommon::gameStarts) {
             parseStartGame(args);
         } else if (keyword == TcpCommon::showBoard) {
@@ -137,6 +139,11 @@ void TcpClient::askStartGame() {
 }
 
 
+void TcpClient::selectFace(WonderFace face) {
+    send(TcpCommon::encodeSingle(TcpCommon::selectFace, std::to_string(face).c_str()));
+}
+
+
 void TcpClient::askAction(const Action & action) {
     send(TcpCommon::encodeSingle(TcpCommon::askAction, action.toString()));
 }
@@ -157,6 +164,15 @@ void TcpClient::parseShowChoice(const QStringList & args) {
     Choice choice;
     choice.fromString(args[0]);
     showChoice(choice);
+}
+
+
+void TcpClient::parseShowChoiceFace(const QStringList & args) {
+    if (args.size() != 1) {
+        return;
+    }
+    WonderId wonderId = args[0].toInt();
+    showChoiceFace(wonderId);
 }
 
 

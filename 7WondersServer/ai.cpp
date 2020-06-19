@@ -14,6 +14,12 @@ AI::~AI() {
 }
 
 
+void AI::chooseFace() {
+    board->selectFace(view.id, WonderFaceInvalid); // will be random
+    status = StatusPlayed;
+}
+
+
 void AI::showBoard() {
     //do nothing
 }

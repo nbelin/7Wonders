@@ -23,6 +23,8 @@ public:
     static constexpr const char * randomPlaces = "RANDOM_PLACES";
     static constexpr const char * showChoice = "SHOW_CHOICE";
     static constexpr const char * askGameStarts = "ASK_GAME_STARTS";
+    static constexpr const char * showChoiceFace = "SHOW_CHOICE_FACE";
+    static constexpr const char * selectFace = "SELECT_FACE";
     static constexpr const char * gameStarts = "GAME_STARTS";
     static constexpr const char * showBoard = "SHOW_BOARD";
     static constexpr const char * cardsToPlay = "CARDS_TO_PLAY";

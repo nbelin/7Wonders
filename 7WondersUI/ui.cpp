@@ -37,6 +37,7 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     QObject::connect(&tcpclient, &TcpClient::userMessage, this, &UI::userMessage);
     QObject::connect(&tcpclient, &TcpClient::setPlayerId, this, &UI::setPlayerId);
     QObject::connect(&tcpclient, &TcpClient::showChoice, this, &UI::showChoice);
+    QObject::connect(&tcpclient, &TcpClient::showChoiceFace, this, &UI::showChoiceFace);
     QObject::connect(&tcpclient, &TcpClient::startGame, this, &UI::startGame);
     QObject::connect(&tcpclient, &TcpClient::showBoard, this, &UI::showBoard);
     QObject::connect(&tcpclient, &TcpClient::showCardsToPlay, this, &UI::showCardsToPlay);
@@ -48,6 +49,7 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
 
     menuView = new QWidget(this);
     choiceView = new QWidget(this);
+    choiceFaceView = new QWidget(this);
     gameView = new QWidget(this);
 
     // menu view
@@ -103,13 +105,13 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
         cp.up = new QPushButton(choiceView);
         cp.up->setFlat(true);
         cp.up->setIcon(QIcon(Tools::imageTokenPath("up.png")));
-        cp.up->setGeometry(740, 500 + i*50, 10, 10);
+        cp.up->setGeometry(740, 500 + i*50, 15, 15);
         QObject::connect(cp.up, &QPushButton::released, this, [this, i]{ movePlayerUp(i); });
 
         cp.down = new QPushButton(choiceView);
         cp.down->setFlat(true);
         cp.down->setIcon(QIcon(Tools::imageTokenPath("down.png")));
-        cp.down->setGeometry(740, 510 + i*50, 10, 10);
+        cp.down->setGeometry(740, 520 + i*50, 15, 15);
         QObject::connect(cp.down, &QPushButton::released, this, [this, i]{ movePlayerDown(i); });
 
         listPlayers.push_back(cp);
@@ -161,6 +163,39 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     buttonAskStartGame = new QPushButton("Start game", choiceView);
     buttonAskStartGame->setGeometry(QRect(580, 450, 90, 30));
     QObject::connect(buttonAskStartGame, &QPushButton::released, this, &UI::buttonAskStartGamePressed);
+
+
+    // choice face view
+
+    selectFaceText = new QLineEdit(choiceFaceView);
+    selectFaceText->setText("Please select a face");
+    selectFaceText->setGeometry(440, 160, 150, 20);
+    selectFaceText->setReadOnly(true);
+    selectFaceText->setFrame(false);
+    palette.setColor(QPalette::Base, QColor(0, 0, 0, 0));
+    palette.setColor(QPalette::Text, Qt::black);
+    selectFaceText->setPalette(palette);
+
+    selectFaceRandom = new QPushButton(choiceFaceView);
+    selectFaceRandom->setFlat(true);
+    selectFaceRandom->setIcon(QIcon(Tools::imageTokenPath("dice.png")));
+    selectFaceRandom->setGeometry(400, 400, 100, 100);
+    selectFaceRandom->setIconSize(selectFaceRandom->size());
+    QObject::connect(selectFaceRandom, &QPushButton::released, this, &UI::selectFaceRandomPressed);
+
+    selectFaceA = new QPushButton(choiceFaceView);
+    selectFaceA->setFlat(true);
+    selectFaceA->setIcon(QIcon(Tools::imageTokenPath("dice.png")));
+    selectFaceA->setGeometry(50, 400, 300, 140);
+    selectFaceA->setIconSize(selectFaceA->size());
+    QObject::connect(selectFaceA, &QPushButton::released, this, &UI::selectFaceAPressed);
+
+    selectFaceB = new QPushButton(choiceFaceView);
+    selectFaceB->setFlat(true);
+    selectFaceB->setIcon(QIcon(Tools::imageTokenPath("dice.png")));
+    selectFaceB->setGeometry(550, 400, 300, 140);
+    selectFaceB->setIconSize(selectFaceB->size());
+    QObject::connect(selectFaceB, &QPushButton::released, this, &UI::selectFaceBPressed);
 
 
     // game view
@@ -247,6 +282,7 @@ UI::~UI() {
 void UI::prepareMenu() {
     menuView->show();
     choiceView->hide();
+    choiceFaceView->hide();
     gameView->hide();
     setMouseTracking(false);
     backGroundAlpha = 30;
@@ -256,6 +292,17 @@ void UI::prepareMenu() {
 void UI::prepareChoice() {
     menuView->hide();
     choiceView->show();
+    choiceFaceView->hide();
+    gameView->hide();
+    setMouseTracking(false);
+    backGroundAlpha = 60;
+}
+
+
+void UI::prepareChoiceFace() {
+    menuView->hide();
+    choiceView->hide();
+    choiceFaceView->show();
     gameView->hide();
     setMouseTracking(false);
     backGroundAlpha = 60;
@@ -265,6 +312,7 @@ void UI::prepareChoice() {
 void UI::prepareGame() {
     menuView->hide();
     choiceView->hide();
+    choiceFaceView->hide();
     gameView->show();
     gameView->setMouseTracking(true);
     setMouseTracking(true);
@@ -348,6 +396,15 @@ void UI::showChoice(const Choice & choice) {
     randomPlaces->blockSignals(true);
     randomPlaces->setChecked(choice.randomPlaces);
     randomPlaces->blockSignals(false);
+}
+
+
+void UI::showChoiceFace(WonderId wonderId) {
+    prepareChoiceFace();
+    const Wonder & wonder = AllWonders::getWonder(wonderId);
+
+    selectFaceA->setIcon(QIcon(wonder.imageA));
+    selectFaceB->setIcon(QIcon(wonder.imageB));
 }
 
 
@@ -1223,6 +1280,7 @@ void UI::paintEvent(QPaintEvent * event) {
     (void) event;
     menuView->resize(this->size());
     choiceView->resize(this->size());
+    choiceFaceView->resize(this->size());
     gameView->resize(this->size());
     setBackground(backGroundAlpha);
 
@@ -1504,4 +1562,18 @@ void UI::randomPlacesChanged(int state) {
     tcpclient.setRandomPlaces(state > 0);
 }
 
+
+void UI::selectFaceRandomPressed() {
+    tcpclient.selectFace(WonderFaceInvalid);
+}
+
+
+void UI::selectFaceAPressed() {
+    tcpclient.selectFace(WonderFaceA);
+}
+
+
+void UI::selectFaceBPressed() {
+    tcpclient.selectFace(WonderFaceB);
+}
 

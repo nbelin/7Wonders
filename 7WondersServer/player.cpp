@@ -29,9 +29,12 @@ Player::~Player() {
 void Player::setWonder(WonderId wonderId) {
     if (view.wonderId != WonderIdInvalid) {
         std::cout << "WARNING wonder already set" << std::endl;
+        production = ResourceProduction();
+        buyableResources = ResourceProduction();
     }
+
     view.wonderId = wonderId;
-    view.wonderFace = WonderFaceB;
+    view.wonderFace = WonderFaceInvalid;
     const Wonder & wonder = AllWonders::getWonder(wonderId);
     production.addResource(wonder.baseIncome);
     buyableResources.addResource(wonder.baseIncome);
@@ -186,7 +189,7 @@ double Player::evaluateScore() {
     }
 
     if (canPlayCardForFreeAlreadyUsed) {
-        points -= 0.5;
+        points -= 1.5;
     }
 
     if (canPlayCardFromDiscarded) {

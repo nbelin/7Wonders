@@ -19,6 +19,7 @@ class Board;
 enum StatusPlayer : int {
     StatusNotReady,
     StatusReady,
+    StatusSelectingFace,
     StatusPlaying,
     StatusPlayed
 };
@@ -33,6 +34,7 @@ public:
     void setWonder(WonderId wonderId);
     void newRound();
     void newAge();
+    virtual void chooseFace() = 0;
     // leave "possibleActions" empty if normal actions (play, wonder, discard[, free])
     void play(const QVector<ActionType> & possibleActions, const QVector<CardId> & cards);
     virtual void playImplem(const QVector<ActionType> & possibleActions, const QVector<CardId> & cards) = 0;
@@ -69,6 +71,7 @@ class FakePlayer : public Player {
 public:
     FakePlayer(Board * board, const char * name): Player(board, name){};
 
+    virtual void chooseFace() {};
     virtual void showBoard() {};
     virtual void playImplem(const QVector<ActionType> &, const QVector<CardId> &) {};
 };

@@ -32,6 +32,7 @@ public:
 
     void prepareMenu();
     void prepareChoice();
+    void prepareChoiceFace();
     void prepareGame();
     void startGame();
 
@@ -78,6 +79,7 @@ private:
 
     QWidget * menuView;
     QWidget * choiceView;
+    QWidget * choiceFaceView;
     QWidget * gameView;
     QProcess * serverProcess;
 
@@ -100,7 +102,10 @@ private:
     QPushButton * buttonAskStartGame;
 
     // choice face view
-
+    QLineEdit * selectFaceText;
+    QPushButton * selectFaceRandom;
+    QPushButton * selectFaceA;
+    QPushButton * selectFaceB;
 
     // game view
     QVector<ResourceToBuy> leftResourcesBought;
@@ -145,6 +150,7 @@ public slots:
     void userMessage(const QString & message);
     void setPlayerId(PlayerId playerId);
     void showChoice(const Choice & choice);
+    void showChoiceFace(WonderId wonderId);
     void showBoard(const QString & boardString);
     void showCardsToPlay(int possibleActions, const QVector<CardId> & cards);
     void confirmAction(bool valid, const QString & optMessage);
@@ -171,6 +177,9 @@ public slots:
     void randomWondersChanged(int state);
     void randomFacesChanged(int state);
     void randomPlacesChanged(int state);
+    void selectFaceRandomPressed();
+    void selectFaceAPressed();
+    void selectFaceBPressed();
 };
 
 #endif // UI_H

@@ -30,6 +30,11 @@ void TcpServer::showChoice(const Choice & choice) {
 }
 
 
+void TcpServer::showChoiceFace(PlayerId playerId, WonderId wonderId) {
+    sendToPlayer(playerId, TcpCommon::encodeSingle(TcpCommon::showChoiceFace, QString::number(wonderId).toStdString().c_str()));
+}
+
+
 void TcpServer::startGame() {
     sendAll(TcpCommon::encodeEmpty(TcpCommon::gameStarts));
 }
@@ -144,6 +149,8 @@ void TcpServer::readyRead()
             parseRandomPlaces(sender, args);
         } else if (keyword == TcpCommon::askGameStarts) {
             parseAskGameStarts(sender, args);
+        } else if (keyword == TcpCommon::selectFace) {
+            parseSelectFace(sender, args);
         } else if (keyword == TcpCommon::askAction) {
             parseAskAction(sender, args);
         } else {
@@ -285,6 +292,16 @@ void TcpServer::parseAskGameStarts(const QTcpSocket * socket, const QStringList 
     }
     //sendDebug("ask game starts");
     askStartGame();
+}
+
+
+void TcpServer::parseSelectFace(const QTcpSocket * socket, const QStringList & args) {
+    if (args.size() != 1) {
+        return;
+    }
+    PlayerId playerId = getConnectedPlayer(socket);
+    WonderFace face = (WonderFace)args[0].toInt();
+    selectFace(playerId, face);
 }
 
 

@@ -41,6 +41,7 @@ class Board : public QObject {
 public:
     enum StatusBoard {
         StatusWaitingReady,
+        StatusWaitingFaces,
         StatusGameStarted,
         StatusGameOver
     };
@@ -86,6 +87,7 @@ public slots:
     void setRandomFaces(bool value);
     void setRandomPlaces(bool value);
     void askStartGame();
+    void selectFace(PlayerId playerId, WonderFace face);
     void askAction(PlayerId playerId, const Action & action);
 
 private:

@@ -9,7 +9,7 @@ PlayerView::PlayerView()
 {
     id = PlayerIdInvalid;
     wonderId = WonderIdInvalid;
-    wonderFace = WonderFaceA;
+    wonderFace = WonderFaceInvalid;
     coins = 0;
 }
 
@@ -20,7 +20,7 @@ QString PlayerView::toString() const {
     list.append(QString::number(id));
     list.append(name);
     list.append(QString::number(wonderId));
-    list.append(WonderFaceToString(wonderFace));
+    list.append(QString::number(wonderFace));
     QStringList listStages;
     for ( Age age : wonderStages ) {
         listStages.append(QString::number(age));
@@ -52,7 +52,7 @@ void PlayerView::fromString(const QString & str) {
     id = list[0].toInt();
     name = list[1];
     wonderId = list[2].toInt();
-    wonderFace = WonderFaceFromString(list[3]);
+    wonderFace = (WonderFace)list[3].toInt();
     wonderStages.clear();
     for ( const QString & strStage : Tools::mySplit(list[4], subSep) ) {
         wonderStages.append(strStage.toInt());

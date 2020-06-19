@@ -9,6 +9,12 @@ Human::Human(Board * board, const char * name) : Player(board, name)
 }
 
 
+void Human::chooseFace() {
+    board->getServer().showChoiceFace(view.id, view.wonderId);
+    status = StatusSelectingFace;
+}
+
+
 void Human::showBoard() {
     board->getServer().showBoardToPlayer(view.id, board->toBoardView());
 }

@@ -41,6 +41,7 @@ Board::Board(QObject *parent, bool fake) : QObject(parent), tcpserver(this) {
     QObject::connect(&tcpserver, &TcpServer::setRandomFaces, this, &Board::setRandomFaces);
     QObject::connect(&tcpserver, &TcpServer::setRandomPlaces, this, &Board::setRandomPlaces);
     QObject::connect(&tcpserver, &TcpServer::askStartGame, this, &Board::askStartGame);
+    QObject::connect(&tcpserver, &TcpServer::selectFace, this, &Board::selectFace);
     QObject::connect(&tcpserver, &TcpServer::askAction, this, &Board::askAction);
 
     AllCards::init();
@@ -257,15 +258,34 @@ void Board::askStartGame() {
 
     state.currentAge = 1;
     state.currentRound = -1;
-    state.status = StatusGameStarted;
+    state.status = StatusWaitingFaces;
     for (Player * player : state.players) {
-        player->status = StatusPlayed;
         player->view.coins = 3;
+        if (randomFaces) {
+            player->status = StatusPlayed;
+            selectFace(player->view.id, WonderFaceInvalid);
+        } else {
+            player->status = StatusSelectingFace;
+            player->chooseFace();
+        }
     }
-    //gameLoop();
-    tcpserver.startGame();
+
+    if (randomPlaces) {
+        std::shuffle(std::begin(state.players), std::end(state.players), random);
+    }
 
     gameProcess();
+}
+
+
+void Board::selectFace(PlayerId playerId, WonderFace face) {
+    if (face == WonderFaceInvalid) {
+        int r = random.operator()();
+        face = (WonderFace) ((r%2) + 1);
+    }
+    Player * player = getPlayer(playerId);
+    player->view.wonderFace = face;
+    player->status = StatusPlayed;
 }
 
 
@@ -293,6 +313,12 @@ Player * Board::getPlayer(PlayerId playerId, size_t offset) const {
 
 
 void Board::gameProcess() {
+    if (state.status == StatusWaitingFaces) {
+        if (areAllPlayers(StatusPlayed)) {
+            state.status = StatusGameStarted;
+            tcpserver.startGame();
+        }
+    }
     if (state.status != StatusGameStarted) {
         return;
     }
@@ -854,6 +880,12 @@ void Board::playSingleAction(PlayerId playerId, Action & action) {
 
 
 void Board::initAllWonders() {
+    if (randomWonders) {
+        for ( Player * p : state.players ) {
+            p->setWonder(WonderIdInvalid);
+        }
+    }
+
     QVector<WonderId> listWonders;
     for (const Wonder & wonder : AllWonders::allWonders) {
         if (wonder.id != WonderIdInvalid) {

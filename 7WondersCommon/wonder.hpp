@@ -13,16 +13,10 @@ const CardId WonderIdInvalid = 0;
 typedef int MilitaryPoints;
 
 enum WonderFace {
-    WonderFaceA,
-    WonderFaceB
+    WonderFaceInvalid = 0,
+    WonderFaceA = 1,
+    WonderFaceB = 2
 };
-
-
-QDataStream & operator<<(QDataStream & out, const WonderFace & wonderFace);
-QDataStream & operator>>(QDataStream & in, WonderFace & wonderFace);
-QString WonderFaceToString(WonderFace wonderFace);
-WonderFace WonderFaceFromString(const QString & str);
-
 
 
 struct Wonder {

@@ -8,6 +8,7 @@ public:
     AI(Board * board, const char * name);
     ~AI();
 
+    virtual void chooseFace();
     virtual void showBoard();
     virtual void playImplem(const QVector<ActionType> & possibleActions, const QVector<CardId> & cards);
 

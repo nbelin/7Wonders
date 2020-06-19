@@ -31,11 +31,13 @@ public:
     void setRandomFaces(bool state);
     void setRandomPlaces(bool state);
     void askStartGame();
+    void selectFace(WonderFace face);
     void askAction(const Action & action);
 
 signals:
     void setPlayerId(PlayerId playerId);
     void showChoice(const Choice & choice);
+    void showChoiceFace(WonderId wonderId);
     void startGame();
     void showBoard(const QString & boardString);
     void showCardsToPlay(int possibleActions, const QVector<CardId> & cards);
@@ -53,6 +55,7 @@ private:
 
     void parsePlayerId(const QStringList & args);
     void parseShowChoice(const QStringList & args);
+    void parseShowChoiceFace(const QStringList & args);
     void parseStartGame(const QStringList & args);
     void parseShowBoard(const QStringList & args);
     void parseCardsToPlay(const QStringList & args);

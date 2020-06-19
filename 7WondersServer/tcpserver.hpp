@@ -22,6 +22,7 @@ public:
     void sendDebug(const QString & message);
     void setPlayerId(const QTcpSocket * socket, PlayerId playerId);
     void showChoice(const Choice & choice);
+    void showChoiceFace(PlayerId playerId, WonderId wonderId);
     void startGame();
     void showBoard(const BoardView & boardView);
     void showBoardToPlayer(PlayerId playerId, const BoardView & boardView);
@@ -43,6 +44,7 @@ signals:
     void setRandomFaces(bool value);
     void setRandomPlaces(bool value);
     void askStartGame();
+    void selectFace(PlayerId playerId, WonderFace face);
     void askAction(PlayerId playerId, const Action & action);
 
 public slots:
@@ -77,6 +79,7 @@ private:
     void parseRandomFaces(const QTcpSocket * socket, const QStringList & args);
     void parseRandomPlaces(const QTcpSocket * socket, const QStringList & args);
     void parseAskGameStarts(const QTcpSocket * socket, const QStringList & args);
+    void parseSelectFace(const QTcpSocket * socket, const QStringList & args);
     void parseAskAction(const QTcpSocket * socket, const QStringList & args);
 };
 

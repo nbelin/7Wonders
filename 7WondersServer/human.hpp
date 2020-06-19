@@ -10,6 +10,7 @@ class Human : public Player {
 public:
     Human(Board * board, const char * name);
 
+    virtual void chooseFace();
     virtual void showBoard();
     virtual void playImplem(const QVector<ActionType> & possibleActions, const QVector<CardId> & cards);
 };
