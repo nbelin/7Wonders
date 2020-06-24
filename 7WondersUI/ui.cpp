@@ -350,6 +350,7 @@ void UI::setPlayerId(PlayerId playerId) {
 
 
 void UI::showChoice(const Choice & choice) {
+    bool allReady = true;
     for (int i=0; i<listPlayers.size(); ++i) {
         if (i < choice.players.size()) {
             const Choice::PlayerChoice & pc = choice.players[i];
@@ -360,6 +361,7 @@ void UI::showChoice(const Choice & choice) {
                 palette.setColor(QPalette::Base, Qt::gray);
             } else {
                 palette.setColor(QPalette::Base, Qt::white);
+                allReady = false;
             }
             listPlayers[i].name->setPalette(palette);
 
@@ -380,6 +382,8 @@ void UI::showChoice(const Choice & choice) {
             listPlayers[i].wonder->clear();
         }
     }
+
+    buttonAskStartGame->setEnabled(allReady);
 
     numberAIs->blockSignals(true);
     numberAIs->setValue(choice.numberAIs);
@@ -1529,7 +1533,18 @@ void UI::numberAIsChanged(int value) {
 
 
 void UI::choiceReadyChanged(int state) {
-    tcpclient.setPlayerReady(state > 0);
+    bool ready = state > 0;
+    tcpclient.setPlayerReady(ready);
+
+    for (ChoicePlayer & cp: listPlayers) {
+        cp.up->setEnabled(!ready);
+        cp.down->setEnabled(!ready);
+    }
+    numberAIs->setEnabled(!ready);
+    selectWonder->setEnabled(!ready);
+    randomWonders->setEnabled(!ready);
+    randomFaces->setEnabled(!ready);
+    randomPlaces->setEnabled(!ready);
 }
 
 
