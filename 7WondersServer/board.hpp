@@ -127,6 +127,7 @@ public:
 
     static const int nbAges = 3;
     static const int nbRounds = 6;
+    static const int maxPlayers = 7;
 
     BoardState state;
     TcpServer tcpserver;

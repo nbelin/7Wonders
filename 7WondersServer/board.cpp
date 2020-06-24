@@ -94,6 +94,9 @@ void Board::setNumberAIs(int number) {
 
     if (number > state.nbAIs) {
         for (int i=state.nbAIs; i<number; ++i) {
+            if (state.nbPlayers >= maxPlayers) {
+                break;
+            }
             QString name = QString("[AI ") + QString::number(i) + QString("]");
             new AI(this, name.toStdString().c_str());
         }
@@ -227,6 +230,9 @@ PlayerId Board::addPlayer(Player * player) {
     state.players.push_back(player);
     state.nbPlayers = state.players.size();
     state.maxGenPlayerId++;
+    if (state.nbPlayers > maxPlayers) {
+        setNumberAIs(state.nbAIs - (maxPlayers - state.nbPlayers));
+    }
     return state.maxGenPlayerId;
 }
 
@@ -916,7 +922,7 @@ void Board::initAllCards() {
         state.remainingCards[i-1].resize(state.nbPlayers);
 
         for ( int j=0; j<state.nbPlayers; ++j) {
-            QVector<CardId> newVec = cardsByAge.mid(j*nbRounds, nbRounds + 1);
+            QVector<CardId> newVec = cardsByAge.mid(j*(nbRounds+1), nbRounds + 1);
             state.remainingCards[i-1][j] = newVec;
         }
     }
@@ -964,6 +970,7 @@ QVector<Player *> Board::getApplyPlayers(PlayerId playerId, WhichPlayer which) c
 
 
 QVector<CardId> Board::getRandomCardsByAge(Age age) {
+    std::cout << (int) age << std::endl;
     QVector<CardId> cardsByAge;
     for ( int i=0; i<AllCards::allCards.size(); ++i ) {
         const Card & refCard = AllCards::allCards[i];
@@ -971,7 +978,7 @@ QVector<CardId> Board::getRandomCardsByAge(Age age) {
         for ( int j=0; j<refCard.nbMinPlayers.size(); ++j ) {
             if ( age == refCard.age && state.nbPlayers >= refCard.nbMinPlayers[j] && refCard.type != TypeGuild ) {
                 cardsByAge.push_back(refCard.id);
-                //std::cout << cardsByAge.size() << " " << (int)refCard.age << " " << (int)refCard.nbMinPlayers << std::endl;
+                std::cout << cardsByAge.size() << " " << (int)refCard.age << " " << (int)refCard.nbMinPlayers[j] << " " << refCard.id << " " << refCard.name << std::endl;
             }
         }
     }
