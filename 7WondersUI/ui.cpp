@@ -460,7 +460,7 @@ void UI::confirmAction(bool valid, const QString & optMessage) {
             rightResourcesBought[i].value = 0;
         }
     } else {
-        userMessage(QString("Confirm action: ") + QString::number(valid) + " " + optMessage);
+        userMessage(QString("Invalid action: ") + optMessage);
     }
     update();
 }
@@ -661,6 +661,8 @@ void UI::showPoints() {
     buttonWonder->hide();
     buttonDiscard->hide();
     buttonFreePlay->hide();
+    buttonPlayDiscarded->hide();
+    buttonCopyGuild->hide();
 
     QRect area = getCentralRect();
     QRect focusedCardArea(area.left(), area.top(), area.height() * 0.7, area.height());
