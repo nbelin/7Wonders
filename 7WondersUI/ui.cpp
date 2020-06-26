@@ -269,10 +269,17 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     imagesCardAge.push_back(QPixmap(Tools::imageTokenPath("age3.png")));
 
     for (const Card & card : AllCards::allCards) {
+        if (QString(card.name).length() == 0) {
+            continue;
+        }
         QString imageName = QString(card.name).toLower().simplified();
         imageName.replace(" ", "");
         imageName += "-EN.png";
-        imagesCards.push_back(QPixmap(Tools::imageCardPath(imageName)));
+        QPixmap image(Tools::imageCardPath(imageName));
+        if (image.isNull()) {
+            std::cout << "Warning: cannot load image: " << imageName.toStdString() << std::endl;
+        }
+        imagesCards.push_back(image);
     }
 }
 
@@ -1329,7 +1336,7 @@ QPushButton * UI::getButtonFromAction(ActionType type) {
 
 
 void UI::paintEvent(QPaintEvent * event) {
-    std::cout << "paintEvent called: " << event->rect().x() << " " << event->rect().y() << " " << event->rect().width() << " " << event->rect().height() << std::endl;
+    //std::cout << "paintEvent called: " << event->rect().x() << " " << event->rect().y() << " " << event->rect().width() << " " << event->rect().height() << std::endl;
     (void) event;
 
     menuView->resize(this->size());
@@ -1352,7 +1359,7 @@ void UI::paintEvent(QPaintEvent * event) {
 
 
 void UI::mousePressEvent(QMouseEvent * event) {
-    std::cout << "MousePressEvent called: " << event->pos().x() << " " << event->pos().y() << std::endl;
+    //std::cout << "MousePressEvent called: " << event->pos().x() << " " << event->pos().y() << std::endl;
     PlayerId player = getFocusedPlayerFromPos(event->pos());
     if ( player != PlayerIdInvalid && player != playerIdPointOfView ) {
         playerIdPointOfView = player;
@@ -1377,7 +1384,7 @@ void UI::mousePressEvent(QMouseEvent * event) {
 
 
 void UI::mouseMoveEvent(QMouseEvent * event) {
-    std::cout << "MouseMoveEvent called: " << event->pos().x() << " " << event->pos().y() << std::endl;
+    //std::cout << "MouseMoveEvent called: " << event->pos().x() << " " << event->pos().y() << std::endl;
     CardId card = getFocusedCardFromPos(event->pos());
     if ( card == CardIdInvalid ) {
         return;

@@ -299,11 +299,11 @@ void AllCards::init() {
     addScience("Study", 3, {3, 5}, 0, Resource(0, 0, 0, 1, 0, 1, 1), Science2, {idSchool});
 
     addGuild("Workers Guild", 0, Resource(1, 2, 1, 1, 0, 0, 0), SpecialNone, PlayerBoth, {TypeResourceRaw}, 0, 1);
-    addGuild("Craftmens Guild", 0, Resource(0, 2, 2, 0, 0, 0, 0), SpecialNone, PlayerBoth, {TypeResourceManufactured}, 0, 2);
+    addGuild("Craftsmens Guild", 0, Resource(0, 2, 2, 0, 0, 0, 0), SpecialNone, PlayerBoth, {TypeResourceManufactured}, 0, 2);
     addGuild("Traders Guild", 0, Resource(Resource::ONE_ALL_MANUFACTURED), SpecialNone, PlayerBoth, {TypeCommerce}, 0, 1);
     addGuild("Philosophers Guild", 0, Resource(3, 0, 0, 0, 0, 1, 1), SpecialNone, PlayerBoth, {TypeScience}, 0, 1);
-    addGuild("Spy Guild", 0, Resource(3, 0, 0, 0, 1, 0, 0), SpecialNone, PlayerBoth, {TypeMilitary}, 0, 1);
-    addGuild("Strategy Guild", 0, Resource(0, 2, 1, 0, 0, 1, 0), SpecialNone, PlayerBoth, {TypeMilitaryDefeat}, 0, 1);
+    addGuild("Spies Guild", 0, Resource(3, 0, 0, 0, 1, 0, 0), SpecialNone, PlayerBoth, {TypeMilitary}, 0, 1);
+    addGuild("Strategists Guild", 0, Resource(0, 2, 1, 0, 0, 1, 0), SpecialNone, PlayerBoth, {TypeMilitaryDefeat}, 0, 1);
     addGuild("Shipowners Guild", 0, Resource(0, 0, 0, 3, 1, 0, 1), SpecialNone, PlayerSelf, {TypeResourceRaw, TypeResourceManufactured, TypeGuild}, 0, 1);
     addGuild("Scientists Guild", 0, Resource(0, 2, 0, 2, 0, 0, 1), SpecialNone, PlayerNone, {}, 0, 0, ScienceAll);
     addGuild("Magistrates Guild", 0, Resource(0, 0, 1, 3, 0, 1, 0), SpecialNone, PlayerBoth, {TypeCivilisation}, 0, 1);
