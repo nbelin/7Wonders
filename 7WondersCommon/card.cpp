@@ -252,7 +252,7 @@ void AllCards::init() {
     addCivilisation("Aqueduct", 2, {3, 7}, 0, Resource(Resource::ONE_STONE, 3), 5, {idBaths});
     CardId idTemple = addCivilisation("Temple", 2, {3, 6}, 0, Resource(Resource::ONE_WOOD | Resource::ONE_CLAY | Resource::ONE_GLASS), 3, {idAltar});
     CardId idStatue = addCivilisation("Statue", 2, {3, 7}, 0, Resource(0, 2, 0, 1, 0, 0, 0), 4, {idTheater});
-    addCivilisation("Courthouse", 2, {3, 5}, 0, Resource(2, 0, 0, 0, 0, 1, 0), 5, {idScriptorium});
+    addCivilisation("Courthouse", 2, {3, 5}, 0, Resource(2, 0, 0, 0, 0, 1, 0), 4, {idScriptorium});
 
     CardId idForum = addCommerce("Forum", 2, {3, 6, 7}, 0, Resource(Resource::ONE_CLAY, 2), 0, Resource(Resource::ONE_ALL_MANUFACTURED),
                 PlayerNone, {}, 0, {idEastTrading, idWestTrading});
