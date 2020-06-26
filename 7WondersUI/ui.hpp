@@ -118,6 +118,7 @@ private:
     QPushButton * buttonCopyGuild;
     QVector<QPixmap> imagesCardAge;
     QVector<QPixmap> imagesCards;
+    QTextEdit * messageText;
 
     void setBackground(int alpha);
     void showCard(CardId card, const QRect & area, int rotate, bool selected=false, bool lastPlayed=false);

@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include <QThread>
 #include <QDesktopServices>
+#include <QTimer>
 
 
 UI::UI(QWidget * parent) : QMainWindow(parent),
@@ -281,6 +282,18 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
         }
         imagesCards.push_back(image);
     }
+
+
+    messageText = new QTextEdit(gameView);
+    messageText->hide();
+    messageText->setFontPointSize(20);
+    palette.setColor(QPalette::Base, QColor(0, 0, 0, 180));
+    palette.setColor(QPalette::Text, Qt::white);
+    messageText->setPalette(palette);
+    messageText->setReadOnly(true);
+    messageText->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    messageText->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
 }
 
 
@@ -360,7 +373,15 @@ void UI::setBackground(int alpha) {
 
 
 void UI::userMessage(const QString & message) {
-    QMessageBox::information(this, "Info", message);
+    //QMessageBox::information(this, "Info", message);
+
+    messageText->setGeometry(size().width()/3, size().height()/3, 0, 0);
+    messageText->setPlainText(message);
+    messageText->document()->adjustSize();
+    messageText->setFixedSize(messageText->document()->size().toSize() + QSize(15, 5));
+
+    messageText->show();
+    QTimer::singleShot(4000, messageText, &QWidget::hide);
 }
 
 

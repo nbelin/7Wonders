@@ -86,6 +86,8 @@ void TcpClient::readyRead() {
 void TcpClient::send(const QString & message) {
     std::cout << "SEND: " << message.toStdString() << "<EOF>" << std::endl;
     socket.write(message.toStdString().c_str());
+    socket.flush();
+    socket.waitForBytesWritten();
 }
 
 

@@ -188,16 +188,22 @@ QTcpSocket * TcpServer::getSocket(PlayerId playerId) {
 
 
 void TcpServer::sendAll(const QString & message) {
+    std::cout << "sendAll: " << message.toStdString() << std::endl;
     for (PlayerSocket & ps : playerSockets) {
         ps.socket->write(QByteArray::fromStdString(message.toStdString()));
+        ps.socket->flush();
+        ps.socket->waitForBytesWritten();
     }
 }
 
 
 void TcpServer::sendToPlayer(PlayerId playerId, const QString & message) {
+    std::cout << "sendToPlayer: " << playerId << " " << message.toStdString() << std::endl;
     QTcpSocket * socket = getSocket(playerId);
     if (socket) {
         socket->write(QByteArray::fromStdString(message.toStdString()));
+        socket->flush();
+        socket->waitForBytesWritten();
     }
 }
 
