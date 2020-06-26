@@ -594,8 +594,8 @@ void UI::showCentral() {
     buttonFreePlay->hide();
     buttonPlayDiscarded->hide();
     buttonCopyGuild->hide();
-    int stepButtonsX = buttonsHeight * 1.5;
-    int minButtonsX = buttonsArea.center().x() - stepButtonsX * 2 - buttonsHeight / 2;
+    int stepButtonsX = buttonsHeight * 1.3;
+    int minButtonsX = buttonsArea.left();
 
     for (int i=0; i<possibleActionTypes.size(); ++i) {
         ActionType type = possibleActionTypes[i];
