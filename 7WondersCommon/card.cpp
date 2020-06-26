@@ -226,7 +226,7 @@ void AllCards::init() {
     CardId idAltar = addCivilisation("Altar", 1, {3, 5}, 0, Resource(), 2);
     CardId idTheater = addCivilisation("Theater", 1, {3, 6}, 0, Resource(), 2);
 
-    addCommerce("Taverne", 1, {4, 5, 7}, 0, Resource(), 5, Resource());
+    addCommerce("Tavern", 1, {4, 5, 7}, 0, Resource(), 5, Resource());
     CardId idEastTrading = addCommerce("East Trading Post", 1, {3, 7}, 0, Resource(), 0, Resource(Resource::ONE_ALL_RAW), PlayerRight);
     CardId idWestTrading = addCommerce("West Trading Post", 1, {3, 7}, 0, Resource(), 0, Resource(Resource::ONE_ALL_RAW), PlayerLeft);
     CardId idMarketPlace = addCommerce("Market Place", 1, {3, 6}, 0, Resource(), 0, Resource(Resource::ONE_ALL_MANUFACTURED), PlayerBoth);
@@ -299,7 +299,7 @@ void AllCards::init() {
     addScience("Study", 3, {3, 5}, 0, Resource(0, 0, 0, 1, 0, 1, 1), Science2, {idSchool});
 
     addGuild("Workers Guild", 0, Resource(1, 2, 1, 1, 0, 0, 0), SpecialNone, PlayerBoth, {TypeResourceRaw}, 0, 1);
-    addGuild("Craftmen Guild", 0, Resource(0, 2, 2, 0, 0, 0, 0), SpecialNone, PlayerBoth, {TypeResourceManufactured}, 0, 2);
+    addGuild("Craftmens Guild", 0, Resource(0, 2, 2, 0, 0, 0, 0), SpecialNone, PlayerBoth, {TypeResourceManufactured}, 0, 2);
     addGuild("Traders Guild", 0, Resource(Resource::ONE_ALL_MANUFACTURED), SpecialNone, PlayerBoth, {TypeCommerce}, 0, 1);
     addGuild("Philosophers Guild", 0, Resource(3, 0, 0, 0, 0, 1, 1), SpecialNone, PlayerBoth, {TypeScience}, 0, 1);
     addGuild("Spy Guild", 0, Resource(3, 0, 0, 0, 1, 0, 0), SpecialNone, PlayerBoth, {TypeMilitary}, 0, 1);
