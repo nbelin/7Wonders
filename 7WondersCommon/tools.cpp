@@ -16,6 +16,11 @@ namespace Tools {
         return createPath({"..", "7WondersUI", "images", name});
     }
 
+    QString imageCardPath(QString name) {
+        return QString(":/images/cards/") + name;
+        return createPath({"..", "7WondersUI", "images", "cards", name});
+    }
+
     QString imageWonderPath(QString name) {
         return QString(":/images/wonders/") + name;
         return createPath({"..", "7WondersUI", "images", "wonders", name});

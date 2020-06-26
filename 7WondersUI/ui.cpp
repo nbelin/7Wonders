@@ -473,12 +473,34 @@ void UI::gameOver() {
 
 
 void UI::showCard(CardId card, const QRect & area, int rotate, bool selected, bool lastPlayed) {
-    (void) rotate;
     if (card == CardIdInvalid) {
         return;
     }
     const Card & cardRef = AllCards::getCard(card);
     if (cardRef.type == TypeNone) {
+        return;
+    }
+
+    double areaRatio = (double) area.height() / area.width();
+    double areaBase = area.width();
+    if (qAbs(rotate) == 90) {
+        areaRatio /= 1.0;
+        areaBase = area.height();
+    }
+    if (areaBase > 50 && areaRatio > 1.1 && areaRatio < 2.1) {
+        // simply show real card and exit
+        QPainter painter(this);
+        //QRect fakeArea = transformPainter(painter, area, rotate);
+        painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+        QString imageName = QString(cardRef.name).toLower().simplified();
+        imageName.replace(" ", "");
+        imageName += "-EN.png";
+        QPixmap image(Tools::imageCardPath(imageName));
+        if ( image.isNull() == true ) {
+            std::cout << "cannot load " << imageName.toStdString() << std::endl;
+        }
+        image = image.scaled(area.size(), Qt::KeepAspectRatio);
+        painter.drawPixmap(area.topLeft(), image);
         return;
     }
 
@@ -537,7 +559,7 @@ void UI::showCentral() {
     double menuHeightCoef = 0.15;
 
     QRect area = getCentralRect();
-    QRect focusedCardArea(area.left(), area.top(), area.height() * 0.6, area.height());
+    QRect focusedCardArea(area.left(), area.top(), area.height() * 0.75, area.height());
 
     QRect buyLeftArea(focusedCardArea.right(), area.top(), area.width() * buyWidthCoef, area.height());
     QRect buyRightArea(area.right() - area.width() * buyWidthCoef, area.top(), area.width() * buyWidthCoef, area.height());
@@ -665,7 +687,7 @@ void UI::showPoints() {
     buttonCopyGuild->hide();
 
     QRect area = getCentralRect();
-    QRect focusedCardArea(area.left(), area.top(), area.height() * 0.7, area.height());
+    QRect focusedCardArea(area.left(), area.top(), area.height() * 0.75, area.height());
     focusedCardArea = takeMarginFromRect(focusedCardArea, 2.0);
     showCard(focusedCard, focusedCardArea, 0);
 

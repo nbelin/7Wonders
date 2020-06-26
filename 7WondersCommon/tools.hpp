@@ -11,6 +11,7 @@
 namespace Tools {
     QString createPath(std::initializer_list<QString> list);
     QString imagePath(QString name);
+    QString imageCardPath(QString name);
     QString imageWonderPath(QString name);
     QString imageTokenPath(QString name);
     QStringList mySplit(const QString & string, const char * separator);
