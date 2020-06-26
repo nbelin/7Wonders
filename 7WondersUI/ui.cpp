@@ -13,7 +13,6 @@
 #include <QMessageBox>
 #include <QThread>
 #include <QDesktopServices>
-#include <QTemporaryFile>
 
 
 UI::UI(QWidget * parent) : QMainWindow(parent),
@@ -265,9 +264,16 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     }
 
 
-    imagesCardAge.push_back(new QPixmap(Tools::imageTokenPath("age1.png")));
-    imagesCardAge.push_back(new QPixmap(Tools::imageTokenPath("age2.png")));
-    imagesCardAge.push_back(new QPixmap(Tools::imageTokenPath("age3.png")));
+    imagesCardAge.push_back(QPixmap(Tools::imageTokenPath("age1.png")));
+    imagesCardAge.push_back(QPixmap(Tools::imageTokenPath("age2.png")));
+    imagesCardAge.push_back(QPixmap(Tools::imageTokenPath("age3.png")));
+
+    for (const Card & card : AllCards::allCards) {
+        QString imageName = QString(card.name).toLower().simplified();
+        imageName.replace(" ", "");
+        imageName += "-EN.png";
+        imagesCards.push_back(QPixmap(Tools::imageCardPath(imageName)));
+    }
 }
 
 
@@ -481,39 +487,17 @@ void UI::showCard(CardId card, const QRect & area, int rotate, bool selected, bo
         return;
     }
 
-    double areaRatio = (double) area.height() / area.width();
-    double areaBase = area.width();
-    if (qAbs(rotate) == 90) {
-        areaRatio /= 1.0;
-        areaBase = area.height();
-    }
-    if (areaBase > 50 && areaRatio > 1.1 && areaRatio < 2.1) {
-        // simply show real card and exit
-        QPainter painter(this);
-        //QRect fakeArea = transformPainter(painter, area, rotate);
-        painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-        QString imageName = QString(cardRef.name).toLower().simplified();
-        imageName.replace(" ", "");
-        imageName += "-EN.png";
-        QPixmap image(Tools::imageCardPath(imageName));
-        if ( image.isNull() == true ) {
-            std::cout << "cannot load " << imageName.toStdString() << std::endl;
-        }
-        image = image.scaled(area.size(), Qt::KeepAspectRatio);
-        painter.drawPixmap(area.topLeft(), image);
-        return;
-    }
+    showedCards.push_back(ShowedCard(area, card));
 
     QPainter painter(this);
     painter.drawRect(area);
-    showedCards.push_back(ShowedCard(area, card));
 
     painter.fillRect(area, getColorFromCard(card));
 
     if ( selected == true || lastPlayed ) {
         QPainterPath path;
         path.addRect(area);
-        QColor color = Qt::black;
+        QColor color = Qt::red;
         QPen pen(color, 3);
         painter.setPen(pen);
         painter.drawPath(path);
@@ -526,6 +510,32 @@ void UI::showCard(CardId card, const QRect & area, int rotate, bool selected, bo
         QPen pen(color, 1);
         painter.setPen(pen);
         painter.drawPath(path);
+    }
+
+    double areaRatio = (double) area.height() / area.width();
+    double areaBase = area.width();
+    if (qAbs(rotate) == 90) {
+        areaRatio = 1.0 / areaRatio;
+        areaBase = area.height();
+    }
+
+    if (areaBase > 50 && areaRatio > 1.1 && areaRatio < 2.1) {
+        // simply show real card and exit
+        //QRect fakeArea = transformPainter(painter, area, rotate);
+        painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+        QPixmap image = imagesCards[card].scaled(area.size(), Qt::KeepAspectRatio);
+        painter.drawPixmap(area.topLeft(), image);
+        return;
+    }
+
+    if (areaBase > 30 && areaRatio > 0.2 && areaRatio < 0.7) {
+        // simply show real card and exit
+        QRect fakeArea = transformPainter(painter, area, rotate);
+        painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+        QPixmap image = imagesCards[card].scaled(fakeArea.size(), Qt::KeepAspectRatioByExpanding);
+
+        painter.drawPixmap(fakeArea, image.copy(fakeArea));
+        return;
     }
 
     if ( area.width() < 40 || area.height() < 40 ) {
@@ -575,7 +585,7 @@ void UI::showCentral() {
     buyRightArea = takeMarginFromRect(buyRightArea, 2.0);
     buttonsArea = takeMarginFromRect(buttonsArea, 2.0);
     discardedArea = takeMarginFromRect(discardedArea, 2.0);
-    focusedCardArea = takeMarginFromRect(focusedCardArea, 2.0);
+    //focusedCardArea = takeMarginFromRect(focusedCardArea, 2.0);
     cardsToPlayArea = takeMarginFromRect(cardsToPlayArea, 2.0);
 
 
@@ -636,10 +646,10 @@ void UI::showCentral() {
         discardedStep = qMin(discardedStep, double(discardedArea.height() - discardedHeight) / (board.discardedCards.size()-1));
     }
     for (int i=0; i<board.discardedCards.size(); ++i) {
-        const QPixmap * imagePtr = imagesCardAge[board.discardedCards[i] -  1];
+        const QPixmap & image = imagesCardAge[board.discardedCards[i] -  1];
         int x = discardedArea.left() + discardedStep * i / 3;
         int y = discardedArea.top() + discardedStep * i;
-        painter.drawPixmap(x, y, discardedWidth, discardedHeight, *imagePtr);
+        painter.drawPixmap(x, y, discardedWidth, discardedHeight, image);
     }
 
 
@@ -688,7 +698,7 @@ void UI::showPoints() {
 
     QRect area = getCentralRect();
     QRect focusedCardArea(area.left(), area.top(), area.height() * 0.75, area.height());
-    focusedCardArea = takeMarginFromRect(focusedCardArea, 2.0);
+    //focusedCardArea = takeMarginFromRect(focusedCardArea, 2.0);
     showCard(focusedCard, focusedCardArea, 0);
 
     int x = focusedCardArea.right();
@@ -1306,6 +1316,7 @@ QRect UI::rotatedScaledRect(const QRect & parentArea, int rotate, double percent
 
 void UI::paintEvent(QPaintEvent * event) {
     (void) event;
+
     menuView->resize(this->size());
     choiceView->resize(this->size());
     choiceFaceView->resize(this->size());

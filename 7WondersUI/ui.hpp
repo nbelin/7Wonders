@@ -116,7 +116,8 @@ private:
     QPushButton * buttonFreePlay;
     QPushButton * buttonPlayDiscarded;
     QPushButton * buttonCopyGuild;
-    QVector<QPixmap *> imagesCardAge;
+    QVector<QPixmap> imagesCardAge;
+    QVector<QPixmap> imagesCards;
 
     void setBackground(int alpha);
     void showCard(CardId card, const QRect & area, int rotate, bool selected=false, bool lastPlayed=false);
