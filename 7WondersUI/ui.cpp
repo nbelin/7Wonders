@@ -490,9 +490,6 @@ void UI::showCard(CardId card, const QRect & area, int rotate, bool selected, bo
     showedCards.push_back(ShowedCard(area, card));
 
     QPainter painter(this);
-    painter.drawRect(area);
-
-    painter.fillRect(area, getColorFromCard(card));
 
     if ( selected == true || lastPlayed ) {
         QPainterPath path;
@@ -537,6 +534,10 @@ void UI::showCard(CardId card, const QRect & area, int rotate, bool selected, bo
         painter.drawPixmap(fakeArea, image.copy(fakeArea));
         return;
     }
+
+    painter.drawRect(area);
+
+    painter.fillRect(area, getColorFromCard(card));
 
     if ( area.width() < 40 || area.height() < 40 ) {
         painter.drawText(area, Qt::AlignCenter, cardRef.getShortText());
@@ -1315,6 +1316,7 @@ QRect UI::rotatedScaledRect(const QRect & parentArea, int rotate, double percent
 
 
 void UI::paintEvent(QPaintEvent * event) {
+    std::cout << "paintEvent called: " << event->rect().x() << " " << event->rect().y() << " " << event->rect().width() << " " << event->rect().height() << std::endl;
     (void) event;
 
     menuView->resize(this->size());
@@ -1337,6 +1339,7 @@ void UI::paintEvent(QPaintEvent * event) {
 
 
 void UI::mousePressEvent(QMouseEvent * event) {
+    std::cout << "MousePressEvent called" << std::endl;
     PlayerId player = getFocusedPlayerFromPos(event->pos());
     if ( player != PlayerIdInvalid && player != playerIdPointOfView ) {
         playerIdPointOfView = player;
@@ -1361,6 +1364,7 @@ void UI::mousePressEvent(QMouseEvent * event) {
 
 
 void UI::mouseMoveEvent(QMouseEvent * event) {
+    std::cout << "MouseMoveEvent called" << std::endl;
     CardId card = getFocusedCardFromPos(event->pos());
     if ( card == CardIdInvalid ) {
         return;
