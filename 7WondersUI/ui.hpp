@@ -139,6 +139,7 @@ private:
     PlayerId getFocusedPlayerFromPos(QPoint point);
     QRect transformPainter(QPainter & painter, const QRect & area, int rotate);
     QRect rotatedScaledRect(const QRect & parentArea, int rotate, double percentX, double percentY, double percentWidth, double percentHeight);
+    QPushButton * getButtonFromAction(ActionType type);
 
     void paintEvent(QPaintEvent * event);
     void mousePressEvent(QMouseEvent * event);

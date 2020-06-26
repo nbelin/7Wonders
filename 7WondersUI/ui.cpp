@@ -332,6 +332,14 @@ void UI::startGame() {
 
 
 void UI::setBackground(int alpha) {
+    static QSize lastSize = QSize(0, 0);
+    static int lastAlpha = -1;
+    if (lastSize == size() && lastAlpha == alpha) {
+        return;
+    }
+    lastAlpha = alpha;
+    lastSize = size();
+
     QPixmap bkgnd(Tools::imagePath("welcome.png"));
     bkgnd = bkgnd.scaled(this->size(), Qt::KeepAspectRatioByExpanding);
     QPixmap blend(bkgnd.size());
@@ -530,16 +538,14 @@ void UI::showCard(CardId card, const QRect & area, int rotate, bool selected, bo
         QRect fakeArea = transformPainter(painter, area, rotate);
         painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
         QPixmap image = imagesCards[card].scaled(fakeArea.size(), Qt::KeepAspectRatioByExpanding);
-
         painter.drawPixmap(fakeArea, image.copy(fakeArea));
         return;
     }
 
     painter.drawRect(area);
-
     painter.fillRect(area, getColorFromCard(card));
 
-    if ( area.width() < 40 || area.height() < 40 ) {
+    if ( area.width() < 60 || area.height() < 60 ) {
         painter.drawText(area, Qt::AlignCenter, cardRef.getShortText());
         return;
     }
@@ -598,45 +604,32 @@ void UI::showCentral() {
 
     QPainter painter(this);
 
-
-    buttonPlay->hide();
-    buttonWonder->hide();
-    buttonDiscard->hide();
-    buttonFreePlay->hide();
-    buttonPlayDiscarded->hide();
-    buttonCopyGuild->hide();
-    int stepButtonsX = buttonsHeight * 1.3;
+    int stepButtonsX = buttonsHeight * 1.2;
     int minButtonsX = buttonsArea.left();
+
+    // optimize performances: only hide unavailable buttons (will trigger yet another paintEvent() otherwise...)
+    QVector<ActionType> actionsToHide;
+    actionsToHide.push_back(playCard);
+    actionsToHide.push_back(buildWonder);
+    actionsToHide.push_back(discardCard);
+    actionsToHide.push_back(playFreeCard);
+    actionsToHide.push_back(playDiscarded);
+    actionsToHide.push_back(copyGuild);
 
     for (int i=0; i<possibleActionTypes.size(); ++i) {
         ActionType type = possibleActionTypes[i];
-        QPushButton * button = nullptr;
-        switch (type) {
-        case noAction:
-            break;
-        case playCard:
-            button = buttonPlay;
-            break;
-        case buildWonder:
-            button = buttonWonder;
-            break;
-        case discardCard:
-            button = buttonDiscard;
-            break;
-        case playFreeCard:
-            button = buttonFreePlay;
-            break;
-        case playDiscarded:
-            button = buttonPlayDiscarded;
-            break;
-        case copyGuild:
-            button = buttonCopyGuild;
-            break;
-        }
+        actionsToHide.removeOne(type);
+        QPushButton * button = getButtonFromAction(type);
 
-        button->setGeometry(minButtonsX + i * stepButtonsX, buttonsArea.top(), buttonsHeight, buttonsHeight);
+        QRect rect(minButtonsX + i * stepButtonsX, buttonsArea.top(), buttonsHeight, buttonsHeight);
+        button->setGeometry(rect);
         button->setIconSize(button->size());
         button->show();
+    }
+
+    for (ActionType type : actionsToHide) {
+        QPushButton * button = getButtonFromAction(type);
+        button->hide();
     }
 
 
@@ -1315,6 +1308,26 @@ QRect UI::rotatedScaledRect(const QRect & parentArea, int rotate, double percent
 }
 
 
+QPushButton * UI::getButtonFromAction(ActionType type) {
+    switch (type) {
+    case noAction:
+        return nullptr;
+    case playCard:
+        return buttonPlay;
+    case buildWonder:
+        return buttonWonder;
+    case discardCard:
+        return buttonDiscard;
+    case playFreeCard:
+        return buttonFreePlay;
+    case playDiscarded:
+        return buttonPlayDiscarded;
+    case copyGuild:
+        return buttonCopyGuild;
+    }
+}
+
+
 void UI::paintEvent(QPaintEvent * event) {
     std::cout << "paintEvent called: " << event->rect().x() << " " << event->rect().y() << " " << event->rect().width() << " " << event->rect().height() << std::endl;
     (void) event;
@@ -1339,7 +1352,7 @@ void UI::paintEvent(QPaintEvent * event) {
 
 
 void UI::mousePressEvent(QMouseEvent * event) {
-    std::cout << "MousePressEvent called" << std::endl;
+    std::cout << "MousePressEvent called: " << event->pos().x() << " " << event->pos().y() << std::endl;
     PlayerId player = getFocusedPlayerFromPos(event->pos());
     if ( player != PlayerIdInvalid && player != playerIdPointOfView ) {
         playerIdPointOfView = player;
@@ -1364,7 +1377,7 @@ void UI::mousePressEvent(QMouseEvent * event) {
 
 
 void UI::mouseMoveEvent(QMouseEvent * event) {
-    std::cout << "MouseMoveEvent called" << std::endl;
+    std::cout << "MouseMoveEvent called: " << event->pos().x() << " " << event->pos().y() << std::endl;
     CardId card = getFocusedCardFromPos(event->pos());
     if ( card == CardIdInvalid ) {
         return;
