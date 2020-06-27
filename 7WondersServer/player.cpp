@@ -152,7 +152,7 @@ double Player::evaluateScore() {
     if (! board->isLastAge()) {
         Currency usefulNbCoins = view.coins;
         if (usefulNbCoins > 8) {
-            // stop giving more points if user has already too much coins
+            // stop giving more points if AI has already too much coins
             usefulNbCoins = 8;
         }
         points += usefulNbCoins * 0.25;
@@ -177,7 +177,10 @@ double Player::evaluateScore() {
 
     // special
     if (canPlayBothCardsAtEndOfAge) {
-        points += 4.5;
+        // age1: 4.5
+        // age2: 4
+        // age3: 3.5
+        points += 5 - board->state.currentAge * 0.5;
     }
 
     if (canCopyNeirbyGuild) {
@@ -193,9 +196,14 @@ double Player::evaluateScore() {
     }
 
     if (canPlayCardFromDiscarded) {
-        points += board->isLastRound();
+        points += board->isLastRound() * 1.5;
         points += board->state.currentAge;
+        points += board->state.discardedCards.size() * 0.1;
     }
+
+
+    // AI should play cards instead of wonders if equivalent
+    points -= view.wonderStages.size();
 
     return points;
 }
