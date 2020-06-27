@@ -989,6 +989,7 @@ void UI::showPlayer(const PlayerView & player, const QRect & area, int rotate) {
         painter.drawPath(path);
     }
 
+    // sort all cards by color
     QVector<QVector<CardId>> cardsToShow;
     cardsToShow.resize(7);
     for ( CardId cardId : player.playedCards ) {
@@ -1023,13 +1024,14 @@ void UI::showPlayer(const PlayerView & player, const QRect & area, int rotate) {
         }
     }
 
+    // split one color if too much cards (and remove empty colors)
     for ( int i=0; i<cardsToShow.size(); ++i ) {
         int len = cardsToShow[i].size();
         if (len == 0) {
             cardsToShow.removeAt(i);
             i--;
         }
-        if (len > 6) {
+        if (len > 7) {
             QVector<QVector<CardId>> newCardsToShow;
             for ( int j=0; j<i; ++j ) {
                 newCardsToShow.append(cardsToShow[j]);
@@ -1043,13 +1045,24 @@ void UI::showPlayer(const PlayerView & player, const QRect & area, int rotate) {
         }
     }
 
+    // merge colors if too much colors
+    while (cardsToShow.size() > 6) {
+        for ( int i=0; i<cardsToShow.size() - 1; ++i ) {
+             if (cardsToShow[i].size() + cardsToShow[i+1].size() <= 7) {
+                 cardsToShow[i].append(cardsToShow[i+1]);
+                 cardsToShow.removeAt(i+1);
+                 break;
+             }
+        }
+    }
+
     for ( int i=0; i<cardsToShow.size(); ++i ) {
         for ( int j=0; j<cardsToShow[i].size(); ++j ) {
             CardId curCardId = cardsToShow[i][j];
             double percentX = 23.0 + 12.5 * i;
-            double percentY = 3.0 + 13.0 * j;
+            double percentY = 3.0 + 10.0 * j;
             double percentWidth = 12.0;
-            double percentHeight = 12.0;
+            double percentHeight = 9.0;
             QRect cardArea = rotatedScaledRect(marginArea, rotate, percentX, percentY, percentWidth, percentHeight);
             bool lastPlayed = false;
             for ( const Action & action : player.lastPlayedActions ) {
