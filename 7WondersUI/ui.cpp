@@ -46,6 +46,7 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
 
     this->resize(1300, 700);
     this->setMinimumSize(600, 400);
+    this->showMaximized();
 
     menuView = new QWidget(this);
     choiceView = new QWidget(this);
