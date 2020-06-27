@@ -647,7 +647,7 @@ void Board::commitActionPart2(PlayerId playerId, int actionId) {
 
     CardId cardId = action.card;
 
-    if (action.type == playCard) {
+    if (action.type == playCard || action.type == playFreeCard || action.type == playDiscarded) {
         applyCardEffectsPart2(playerId, cardId);
     }
 
