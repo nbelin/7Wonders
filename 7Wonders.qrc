@@ -139,5 +139,7 @@
         <file>images/cards/westtradingpost-EN.png</file>
         <file>images/cards/workersguild-EN.png</file>
         <file>images/cards/workshop-EN.png</file>
+        <file>images/icon.png</file>
+        <file>images/tokens/win-1.back.png</file>
     </qresource>
 </RCC>
