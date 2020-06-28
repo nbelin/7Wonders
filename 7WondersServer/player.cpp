@@ -203,7 +203,10 @@ double Player::evaluateScore() {
 
 
     // AI should play cards instead of wonders if equivalent
-    points -= view.wonderStages.size();
+    // but no need to avoid this when last round, in general next age has far better cards
+    if (! board->isLastRound()) {
+        points -= view.wonderStages.size() * 0.9;
+    }
 
     return points;
 }
