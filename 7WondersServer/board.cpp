@@ -820,6 +820,7 @@ void Board::showChoice() {
     Choice choice;
     for (const Player * player : state.players) {
         Choice::PlayerChoice p;
+        p.id = player->view.id;
         p.name = player->view.name;
         p.wonderId = player->view.wonderId;
         p.ready = player->status == StatusReady;

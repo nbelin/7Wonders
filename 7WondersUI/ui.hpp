@@ -76,7 +76,8 @@ private:
     Action action;
     TcpClient tcpclient;
     bool isGameOver;
-    int backGroundAlpha;
+    int backgroundAlpha;
+    QString backgroundImage;
 
     QWidget * menuView;
     QWidget * choiceView;

@@ -11,6 +11,7 @@ QString Choice::toString() const {
     QStringList listPlayers;
     for ( const PlayerChoice & p : players ) {
         QStringList listPlayer;
+        listPlayer.append(QString::number(p.id));
         listPlayer.append(p.name);
         listPlayer.append(QString::number(p.wonderId));
         listPlayer.append(QString::number(p.ready));
@@ -32,9 +33,10 @@ void Choice::fromString(const QString & str) {
     for ( const QString & strPlayers : Tools::mySplit(list[0], subSep) ) {
         QStringList listPlayer = Tools::mySplit(strPlayers, subSubSep);
         PlayerChoice player;
-        player.name = listPlayer[0];
-        player.wonderId = listPlayer[1].toInt();
-        player.ready = listPlayer[2].toInt();
+        player.id = listPlayer[0].toInt();
+        player.name = listPlayer[1];
+        player.wonderId = listPlayer[2].toInt();
+        player.ready = listPlayer[3].toInt();
         players.append(player);
     }
     numberAIs = list[1].toInt();

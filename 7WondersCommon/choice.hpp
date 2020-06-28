@@ -6,11 +6,13 @@
 
 #include "wonder.hpp"
 #include "tools.hpp"
+#include "playerview.hpp"
 
 class Choice
 {
 public:
     struct PlayerChoice {
+        PlayerId id;
         QString name;
         WonderId wonderId;
         bool ready;

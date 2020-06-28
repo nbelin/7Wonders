@@ -21,7 +21,8 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     focusedCard(CardIdInvalid),
     tcpclient(this),
     isGameOver(false),
-    backGroundAlpha(0),
+    backgroundAlpha(0),
+    backgroundImage(Tools::imagePath("welcome.png")),
     serverProcess(nullptr) {
 
     if (tcpclient.connectServer("127.0.0.1")) {
@@ -52,7 +53,6 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     choiceView = new QWidget(this);
     choiceFaceView = new QWidget(this);
     gameView = new QWidget(this);
-
 
     // menu view
 
@@ -381,7 +381,8 @@ void UI::prepareMenu() {
     choiceFaceView->hide();
     gameView->hide();
     setMouseTracking(false);
-    backGroundAlpha = 30;
+    backgroundAlpha = 30;
+    backgroundImage = Tools::imagePath("welcome.png");
 }
 
 
@@ -391,7 +392,7 @@ void UI::prepareChoice() {
     choiceFaceView->hide();
     gameView->hide();
     setMouseTracking(false);
-    backGroundAlpha = 60;
+    backgroundAlpha = 100;
 }
 
 
@@ -401,7 +402,7 @@ void UI::prepareChoiceFace() {
     choiceFaceView->show();
     gameView->hide();
     setMouseTracking(false);
-    backGroundAlpha = 60;
+    backgroundAlpha = 100;
 }
 
 
@@ -412,7 +413,7 @@ void UI::prepareGame() {
     gameView->show();
     gameView->setMouseTracking(true);
     setMouseTracking(true);
-    backGroundAlpha = 120;
+    backgroundAlpha = 140;
 }
 
 
@@ -424,13 +425,15 @@ void UI::startGame() {
 void UI::setBackground(int alpha) {
     static QSize lastSize = QSize(0, 0);
     static int lastAlpha = -1;
-    if (lastSize == size() && lastAlpha == alpha) {
+    static QString lastName = "";
+    if (lastSize == size() && lastAlpha == alpha && lastName == backgroundImage) {
         return;
     }
     lastAlpha = alpha;
     lastSize = size();
+    lastName = backgroundImage;
 
-    QPixmap bkgnd(Tools::imagePath("welcome.png"));
+    QPixmap bkgnd(backgroundImage);
     bkgnd = bkgnd.scaled(this->size(), Qt::KeepAspectRatioByExpanding);
     QPixmap blend(bkgnd.size());
     blend.fill(QColor(255, 255, 255, alpha));
@@ -466,6 +469,15 @@ void UI::showChoice(const Choice & choice) {
     for (int i=0; i<listPlayers.size(); ++i) {
         if (i < choice.players.size()) {
             const Choice::PlayerChoice & pc = choice.players[i];
+
+            if (pc.id == playerId) {
+                selectWonder->setCurrentIndex(pc.wonderId);
+                if (pc.wonderId == WonderIdInvalid) {
+                    backgroundImage = Tools::imagePath("welcome.png");
+                } else {
+                    backgroundImage = AllWonders::getWonder(pc.wonderId).image;
+                }
+            }
 
             listPlayers[i].name->setText(pc.name);
             QPalette palette;
@@ -512,12 +524,15 @@ void UI::showChoice(const Choice & choice) {
     randomPlaces->blockSignals(true);
     randomPlaces->setChecked(choice.randomPlaces);
     randomPlaces->blockSignals(false);
+
+    update();
 }
 
 
 void UI::showChoiceFace(WonderId wonderId) {
     prepareChoiceFace();
     const Wonder & wonder = AllWonders::getWonder(wonderId);
+    backgroundImage = wonder.image;
 
     QPixmap imageA = QPixmap(wonder.imageA).scaled(selectFaceA->size(), Qt::KeepAspectRatioByExpanding);
     selectFaceA->setIcon(imageA);
@@ -1451,7 +1466,7 @@ void UI::paintEvent(QPaintEvent * event) {
     choiceView->resize(this->size());
     choiceFaceView->resize(this->size());
     gameView->resize(this->size());
-    setBackground(backGroundAlpha);
+    setBackground(backgroundAlpha);
 
     resetShowedCards();
     resetShowedPlayers();
