@@ -528,11 +528,11 @@ void UI::showCard(CardId card, const QRect & area, int rotate, bool selected, bo
 
     QPainter painter(this);
 
-    if ( selected == true || lastPlayed ) {
+    if ( selected == true ) {
         QPainterPath path;
         path.addRect(area);
-        QColor color = Qt::red;
-        QPen pen(color, 3);
+        QColor color = Qt::green;
+        QPen pen(color, 6);
         painter.setPen(pen);
         painter.drawPath(path);
     }
@@ -541,7 +541,7 @@ void UI::showCard(CardId card, const QRect & area, int rotate, bool selected, bo
         QPainterPath path;
         path.addRect(area);
         QColor color = Qt::white;
-        QPen pen(color, 1);
+        QPen pen(color, 4);
         painter.setPen(pen);
         painter.drawPath(path);
     }
@@ -1032,7 +1032,7 @@ void UI::showPlayer(const PlayerView & player, const QRect & area, int rotate) {
             cardsToShow.removeAt(i);
             i--;
         }
-        if (len > 7) {
+        if (len > 6) {
             QVector<QVector<CardId>> newCardsToShow;
             for ( int j=0; j<i; ++j ) {
                 newCardsToShow.append(cardsToShow[j]);
@@ -1047,9 +1047,9 @@ void UI::showPlayer(const PlayerView & player, const QRect & area, int rotate) {
     }
 
     // merge colors if too much colors
-    while (cardsToShow.size() > 6) {
+    while (cardsToShow.size() > 5) {
         for ( int i=0; i<cardsToShow.size() - 1; ++i ) {
-             if (cardsToShow[i].size() + cardsToShow[i+1].size() <= 7) {
+             if (cardsToShow[i].size() + cardsToShow[i+1].size() <= 6) {
                  cardsToShow[i].append(cardsToShow[i+1]);
                  cardsToShow.removeAt(i+1);
                  break;
@@ -1060,10 +1060,10 @@ void UI::showPlayer(const PlayerView & player, const QRect & area, int rotate) {
     for ( int i=0; i<cardsToShow.size(); ++i ) {
         for ( int j=0; j<cardsToShow[i].size(); ++j ) {
             CardId curCardId = cardsToShow[i][j];
-            double percentX = 23.0 + 12.5 * i;
-            double percentY = 3.0 + 10.0 * j;
-            double percentWidth = 12.0;
-            double percentHeight = 9.0;
+            double percentX = 23.0 + 15.2 * i;
+            double percentY = 2.0 + 12.2 * j;
+            double percentWidth = 14.5;
+            double percentHeight = 11.5;
             QRect cardArea = rotatedScaledRect(marginArea, rotate, percentX, percentY, percentWidth, percentHeight);
             bool lastPlayed = false;
             for ( const Action & action : player.lastPlayedActions ) {
