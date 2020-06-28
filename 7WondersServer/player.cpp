@@ -58,6 +58,7 @@ void Player::newAge() {
 
 void Player::play(const QVector<ActionType> & possibleActions, const QVector<CardId> & cards) {
     std::cout << view.name.toStdString() << " plays: " << cards.size() << std::endl;
+    board->getServer().sendDebug(view.name + ": " + QString::number(cards.size()) + " cards");
     for (CardId cardId : cards) {
         std::cout << "  " << cardId << " (" << AllCards::getCard(cardId).name << ")" << std::endl;
     }

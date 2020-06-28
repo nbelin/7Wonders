@@ -58,7 +58,9 @@ void TcpClient::readyRead() {
         QStringList args(strList);
         args.removeFirst();
 
-        if (keyword == TcpCommon::playerId) {
+        if (keyword == TcpCommon::debug) {
+            std::cout << "[Debug] " << args.join(TcpCommon::separator).toStdString() << std::endl;
+        } else if (keyword == TcpCommon::playerId) {
             parsePlayerId(args);
         } else if (keyword == TcpCommon::showChoice) {
             parseShowChoice(args);

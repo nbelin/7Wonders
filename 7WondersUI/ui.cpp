@@ -930,7 +930,7 @@ void UI::showPlayer(const PlayerView & player, const QRect & area, int rotate) {
         }
         if (imagePtr) {
             int x = 10 + 60*(i/2);
-            int y = 200 + 60*(i%2);
+            int y = 220 + 60*(i%2);
             painter.drawPixmap(x, y, width, height, *imagePtr);
         }
     }
