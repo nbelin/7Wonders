@@ -53,7 +53,20 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     choiceFaceView = new QWidget(this);
     gameView = new QWidget(this);
 
+
     // menu view
+
+    gridMenu = new QGridLayout(menuView);
+    gridMenu->setColumnStretch(0, 1);
+    gridMenu->setColumnStretch(1, 0);
+    gridMenu->setColumnStretch(2, 0);
+    gridMenu->setColumnStretch(3, 1);
+    gridMenu->setRowStretch(0, 1);
+    gridMenu->setRowStretch(1, 0);
+    gridMenu->setRowStretch(2, 0);
+    gridMenu->setRowStretch(4, 0);
+    gridMenu->setRowStretch(5, 1);
+    gridMenu->setSpacing(20);
 
     helpText = new QTextEdit(menuView);
     helpText->setFontPointSize(13);
@@ -68,6 +81,7 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     helpText->setFixedSize(helpText->document()->size().toSize() + QSize(15, 5));
     helpText->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     helpText->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    gridMenu->addWidget(helpText, 1, 1, 1, 2, Qt::AlignCenter);
 
     playerName = new QLineEdit(menuView);
     playerName->setPlaceholderText("player name");
@@ -77,42 +91,70 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
         playerName->setText(qgetenv("USERNAME"));
     }
     playerName->setGeometry(QRect(500, 450, 150, 20));
+    playerName->setFixedSize(150, 20);
+    gridMenu->addWidget(playerName, 2, 1, 1, 2, Qt::AlignCenter);
 
     remoteIpAddress = new QLineEdit(menuView);
     remoteIpAddress->setPlaceholderText("remote IP address");
     remoteIpAddress->setGeometry(QRect(600, 500, 150, 20));
+    remoteIpAddress->setFixedSize(150, 20);
+    gridMenu->addWidget(remoteIpAddress, 3, 2, Qt::AlignCenter);
 
     createGame = new QPushButton("Create game", menuView);
     createGame->setGeometry(QRect(400, 530, 150, 30));
+    createGame->setFixedSize(150, 30);
+    gridMenu->addWidget(createGame, 3, 1, 2, 1, Qt::AlignCenter);
     QObject::connect(createGame, &QPushButton::released, this, &UI::buttonCreateGamePressed);
 
     joinGame = new QPushButton("Join game", menuView);
-    joinGame->setGeometry(QRect(600, 530, 150, 30));
+    joinGame->setFixedSize(150, 30);
+    gridMenu->addWidget(joinGame, 4, 2, Qt::AlignCenter);
     QObject::connect(joinGame, &QPushButton::released, this, &UI::buttonJoinGamePressed);
 
 
     // choice view
+
+    gridChoice = new QGridLayout(choiceView);
+    gridChoice->setColumnStretch(0, 4);
+    gridChoice->setColumnStretch(1, 1);
+    gridChoice->setColumnStretch(2, 0);
+    gridChoice->setColumnStretch(3, 1);
+    gridChoice->setColumnStretch(4, 0);
+    gridChoice->setColumnStretch(5, 1);
+    gridChoice->setColumnStretch(6, 4);
+    gridChoice->setRowStretch(0, 1);
+    for (int i=1; i>15; ++i) {
+        gridChoice->setRowStretch(i, 0);
+    }
+    gridChoice->setRowStretch(15, 1);
+    gridChoice->setSpacing(10);
 
     for ( size_t i=0; i<7; ++i ) {
         ChoicePlayer cp;
 
         cp.name = new QLineEdit(choiceView);
         cp.name->setReadOnly(true);
-        cp.name->setGeometry(500, 500 + i*50, 150, 20);
+        cp.name->setFixedSize(150, 20);
+        gridChoice->addWidget(cp.name, 1+2*i, 1, 2, 1, Qt::AlignCenter);
 
         cp.wonder = new QLabel(choiceView);
-        cp.wonder->setGeometry(660, 500 + i*50, 60, 40);
+        cp.wonder->setFixedSize(90, 50);
+        gridChoice->addWidget(cp.wonder, 1+2*i, 2, 2, 1, Qt::AlignCenter);
 
         cp.up = new QPushButton(choiceView);
         cp.up->setFlat(true);
         cp.up->setIcon(QIcon(Tools::imageTokenPath("up.png")));
-        cp.up->setGeometry(740, 500 + i*50, 15, 15);
+        cp.up->setFixedSize(30, 30);
+        cp.up->setIconSize(cp.up->size());
+        gridChoice->addWidget(cp.up, 1+2*i, 3, Qt::AlignCenter);
         QObject::connect(cp.up, &QPushButton::released, this, [this, i]{ movePlayerUp(i); });
 
         cp.down = new QPushButton(choiceView);
         cp.down->setFlat(true);
         cp.down->setIcon(QIcon(Tools::imageTokenPath("down.png")));
-        cp.down->setGeometry(740, 520 + i*50, 15, 15);
+        cp.down->setFixedSize(30, 30);
+        cp.down->setIconSize(cp.down->size());
+        gridChoice->addWidget(cp.down, 1+2*i+1, 3, Qt::AlignCenter);
         QObject::connect(cp.down, &QPushButton::released, this, [this, i]{ movePlayerDown(i); });
 
         listPlayers.push_back(cp);
@@ -120,25 +162,28 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
 
     numberAIs = new QSpinBox(choiceView);
     numberAIs->setRange(0, 7);
-    numberAIs->setGeometry(400, 460, 35, 25);
+    numberAIs->setFixedSize(35, 25);
+    gridChoice->addWidget(numberAIs, 7, 4, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
     QObject::connect(numberAIs, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &UI::numberAIsChanged);
 
     numberAIsText = new QLineEdit(choiceView);
     numberAIsText->setText("number of AIs");
-    numberAIsText->setGeometry(440, 460, 100, 20);
+    numberAIsText->setFixedSize(100, 20);
     numberAIsText->setReadOnly(true);
     numberAIsText->setFrame(false);
     palette.setColor(QPalette::Base, QColor(0, 0, 0, 0));
     palette.setColor(QPalette::Text, Qt::black);
     numberAIsText->setPalette(palette);
+    gridChoice->addWidget(numberAIsText, 7, 5, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
 
     choiceReady = new QCheckBox("ready", choiceView);
-    choiceReady->setGeometry(500, 430, 60, 25);
+    choiceReady->setFixedSize(60, 25);
+    gridChoice->addWidget(choiceReady, 1, 4, 1, 2, Qt::AlignCenter);
     QObject::connect(choiceReady, &QCheckBox::stateChanged, this, &UI::choiceReadyChanged);
 
     selectWonder = new QComboBox(choiceView);
-    selectWonder->setGeometry(300, 330, 250, 55);
-    selectWonder->setIconSize(QSize(100, 50));
+    selectWonder->setFixedSize(250, 80);
+    selectWonder->setIconSize(QSize(120, 60));
     selectWonder->setMaxVisibleItems(5);
     for (Wonder w : AllWonders::allWonders) {
         if (w.id == WonderIdInvalid) {
@@ -147,55 +192,79 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
             selectWonder->addItem(QIcon(w.image), w.name);
         }
     }
+    gridChoice->addWidget(selectWonder, 4, 4, 3, 2, Qt::AlignCenter);
     QObject::connect(selectWonder, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &UI::selectWonderChanged);
 
     randomWonders = new QCheckBox("wonders: all random", choiceView);
-    randomWonders->setGeometry(400, 330, 100, 25);
+    randomWonders->setFixedSize(150, 25);
+    gridChoice->addWidget(randomWonders, 8, 4, 1, 2, Qt::AlignCenter);
     QObject::connect(randomWonders, &QCheckBox::stateChanged, this, &UI::randomWondersChanged);
 
     randomFaces = new QCheckBox("faces: all random", choiceView);
-    randomFaces->setGeometry(500, 330, 100, 25);
+    randomFaces->setFixedSize(150, 25);
+    gridChoice->addWidget(randomFaces, 9, 4, 1, 2, Qt::AlignCenter);
     QObject::connect(randomFaces, &QCheckBox::stateChanged, this, &UI::randomFacesChanged);
 
     randomPlaces = new QCheckBox("places: all random", choiceView);
-    randomPlaces->setGeometry(600, 330, 100, 25);
+    randomPlaces->setFixedSize(150, 25);
+    gridChoice->addWidget(randomPlaces, 10, 4, 1, 2, Qt::AlignCenter);
     QObject::connect(randomPlaces, &QCheckBox::stateChanged, this, &UI::randomPlacesChanged);
 
     buttonAskStartGame = new QPushButton("Start game", choiceView);
-    buttonAskStartGame->setGeometry(QRect(580, 450, 90, 30));
+    buttonAskStartGame->setFixedSize(130, 50);
+    gridChoice->addWidget(buttonAskStartGame, 2, 4, 2, 2, Qt::AlignCenter);
     QObject::connect(buttonAskStartGame, &QPushButton::released, this, &UI::buttonAskStartGamePressed);
 
 
     // choice face view
 
+    gridChoiceFace = new QGridLayout(choiceFaceView);
+    gridChoiceFace->setColumnStretch(0, 1);
+    gridChoiceFace->setColumnStretch(1, 1);
+    gridChoiceFace->setColumnStretch(2, 0);
+    gridChoiceFace->setColumnStretch(3, 1);
+    gridChoiceFace->setColumnStretch(4, 1);
+    gridChoiceFace->setRowStretch(0, 2);
+    gridChoiceFace->setRowStretch(1, 0);
+    gridChoiceFace->setRowStretch(2, 1);
+    gridChoiceFace->setRowStretch(3, 2);
+    gridChoiceFace->setSpacing(30);
+
     selectFaceText = new QLineEdit(choiceFaceView);
     selectFaceText->setText("Please select a face");
-    selectFaceText->setGeometry(440, 160, 150, 20);
+    selectFaceText->setFixedSize(150, 20);
     selectFaceText->setReadOnly(true);
     selectFaceText->setFrame(false);
     palette.setColor(QPalette::Base, QColor(0, 0, 0, 0));
     palette.setColor(QPalette::Text, Qt::black);
     selectFaceText->setPalette(palette);
+    gridChoiceFace->addWidget(selectFaceText, 1, 1, 1, 3, Qt::AlignCenter);
 
     selectFaceRandom = new QPushButton(choiceFaceView);
     selectFaceRandom->setFlat(true);
+    selectFaceRandom->setFixedSize(100, 100);
+    selectFaceRandom->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     selectFaceRandom->setIcon(QIcon(Tools::imageTokenPath("dice.png")));
-    selectFaceRandom->setGeometry(400, 400, 100, 100);
     selectFaceRandom->setIconSize(selectFaceRandom->size());
+    gridChoiceFace->addWidget(selectFaceRandom, 2, 2);
     QObject::connect(selectFaceRandom, &QPushButton::released, this, &UI::selectFaceRandomPressed);
 
     selectFaceA = new QPushButton(choiceFaceView);
     selectFaceA->setFlat(true);
+    selectFaceA->setFixedSize(400, 200);
+    selectFaceA->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     selectFaceA->setIcon(QIcon(Tools::imageTokenPath("dice.png")));
-    selectFaceA->setGeometry(50, 400, 300, 140);
     selectFaceA->setIconSize(selectFaceA->size());
+    gridChoiceFace->addWidget(selectFaceA, 2, 1);
     QObject::connect(selectFaceA, &QPushButton::released, this, &UI::selectFaceAPressed);
 
     selectFaceB = new QPushButton(choiceFaceView);
     selectFaceB->setFlat(true);
+    selectFaceB->setFixedSize(400, 200);
+    selectFaceB->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     selectFaceB->setIcon(QIcon(Tools::imageTokenPath("dice.png")));
-    selectFaceB->setGeometry(550, 400, 300, 140);
     selectFaceB->setIconSize(selectFaceB->size());
+    gridChoiceFace->addWidget(selectFaceB, 2, 3);
     QObject::connect(selectFaceB, &QPushButton::released, this, &UI::selectFaceBPressed);
 
 
@@ -450,8 +519,12 @@ void UI::showChoiceFace(WonderId wonderId) {
     prepareChoiceFace();
     const Wonder & wonder = AllWonders::getWonder(wonderId);
 
-    selectFaceA->setIcon(QIcon(wonder.imageA));
+    QPixmap imageA = QPixmap(wonder.imageA).scaled(selectFaceA->size(), Qt::KeepAspectRatioByExpanding);
+    selectFaceA->setIcon(imageA);
+    selectFaceA->setIconSize(selectFaceA->size());
+
     selectFaceB->setIcon(QIcon(wonder.imageB));
+    selectFaceB->setIconSize(selectFaceB->size());
 }
 
 

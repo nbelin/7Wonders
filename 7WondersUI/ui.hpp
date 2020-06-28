@@ -15,6 +15,7 @@
 #include <QVector>
 #include <QComboBox>
 #include <QLabel>
+#include <QGridLayout>
 
 #include "boardview.hpp"
 #include "playerview.hpp"
@@ -84,6 +85,7 @@ private:
     QProcess * serverProcess;
 
     // menu view
+    QGridLayout * gridMenu;
     QTextEdit * helpText;
     QLineEdit * playerName;
     QLineEdit * remoteIpAddress;
@@ -91,6 +93,7 @@ private:
     QPushButton * joinGame;
 
     // choice view
+    QGridLayout * gridChoice;
     QVector<ChoicePlayer> listPlayers;
     QSpinBox * numberAIs;
     QLineEdit * numberAIsText;
@@ -102,6 +105,7 @@ private:
     QPushButton * buttonAskStartGame;
 
     // choice face view
+    QGridLayout * gridChoiceFace;
     QLineEdit * selectFaceText;
     QPushButton * selectFaceRandom;
     QPushButton * selectFaceA;

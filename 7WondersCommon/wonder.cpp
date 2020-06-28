@@ -334,7 +334,7 @@ void AllWonders::addWonder(const char * name, Resource baseIncome, QVector<CardI
     wonder.baseIncome = baseIncome;
     wonder.stagesA = stagesA;
     wonder.stagesB = stagesB;
-    wonder.image = Tools::imageWonderPath(image);
+    wonder.image = Tools::imageWonderPath(QString("7W_wallpapper_1920x1080_") + image);
     wonder.imageA = Tools::imageWonderPath(imageA);
     wonder.imageB = Tools::imageWonderPath(imageB);
     allWonders.push_back(wonder);
