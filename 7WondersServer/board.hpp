@@ -107,6 +107,7 @@ private:
     bool isValidActionFreeCard(PlayerId playerId, const Action & action, QString & optMessage);
     bool isValidActionCopyGuild(PlayerId playerId, const Action & action, QString & optMessage);
     void showChoice();
+    void sendWaitingPlayerMessage(PlayerId playerId);
 
 public:
     size_t getPlayerArrayId(PlayerId playerId) const;
@@ -132,6 +133,7 @@ public:
     BoardState state;
     TcpServer tcpserver;
     QTimer * timer;
+    QTimer * waitingPlayerTimer;
     bool randomWonders;
     bool randomFaces;
     bool randomPlaces;

@@ -448,7 +448,7 @@ void UI::setBackground(int alpha) {
 void UI::userMessage(const QString & message) {
     //QMessageBox::information(this, "Info", message);
 
-    messageText->setGeometry(size().width()/3, size().height()/3, 0, 0);
+    messageText->setGeometry(size().width()/5, size().height()/5, 0, 0);
     messageText->setPlainText(message);
     messageText->document()->adjustSize();
     messageText->setFixedSize(messageText->document()->size().toSize() + QSize(15, 5));

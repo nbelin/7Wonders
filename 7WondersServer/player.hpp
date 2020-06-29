@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <QElapsedTimer>
 
 typedef int PlayerId;
 
@@ -51,6 +52,8 @@ public:
     Shield shields;
     StatusPlayer status;
     QVector<Action> actionsToPlay;
+    QElapsedTimer lastPlayStart;
+    QVector<int> playTimesMs;
 
     bool canPlayBothCardsAtEndOfAge;
     bool canCopyNeirbyGuild;

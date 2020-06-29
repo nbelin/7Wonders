@@ -77,10 +77,13 @@ void Player::play(const QVector<ActionType> & possibleActions, const QVector<Car
     } else {
         playImplem(possibleActions, cards);
     }
+
+    lastPlayStart.start();
 }
 
 
 void Player::addPlayedAction(const Action & action) {
+    playTimesMs.push_back(lastPlayStart.elapsed());
     status = StatusPlayed;
     actionsToPlay.append(action);
     actionsToPlay[actionsToPlay.size() - 1].status = validated;

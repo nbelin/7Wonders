@@ -50,6 +50,8 @@ Board::Board(QObject *parent, bool fake) : QObject(parent), tcpserver(this) {
     timer = new QTimer(this);
     QObject::connect(timer, &QTimer::timeout, this, &Board::gameProcess);
     timer->start(500);
+
+    waitingPlayerTimer = new QTimer(this);
 }
 
 
@@ -329,13 +331,19 @@ void Board::gameProcess() {
         return;
     }
 
-    QStringList waitingPlayers;
+    QVector<Player *> waitingPlayers;
     for (Player * player : state.players) {
         if (player->status != StatusPlayed) {
-            waitingPlayers.append(player->view.name);
+            waitingPlayers.append(player);
         }
     }
-    //tcpserver.sendDebug(waitingPlayers.join(" ; "));
+    if (waitingPlayers.size() == 1 && (state.nbPlayers - state.nbAIs) > 1) {
+        if (waitingPlayerTimer->isActive() == false) {
+            PlayerId id = waitingPlayers[0]->view.id;
+            waitingPlayerTimer->callOnTimeout([this, id]{ sendWaitingPlayerMessage(id); });
+            waitingPlayerTimer->start(15000);
+        }
+    }
 
 
     if (isLastRound()) {
@@ -350,6 +358,7 @@ void Board::gameProcess() {
 
 
     if (areAllPlayersNot(StatusPlaying)) {
+        waitingPlayerTimer->stop();
         tcpserver.sendDebug("all players played!");
         commitActionsParts1and2();
 
@@ -831,6 +840,12 @@ void Board::showChoice() {
     choice.randomFaces = randomFaces;
     choice.randomPlaces = randomPlaces;
     tcpserver.showChoice(choice);
+}
+
+
+void Board::sendWaitingPlayerMessage(PlayerId playerId) {
+    tcpserver.sendMessageToPlayer(playerId, "Hey! We are waiting for you ;)");
+    tcpserver.sendMessageNotToPlayer(playerId, getPlayer(playerId)->view.name + " is still playing...");
 }
 
 
