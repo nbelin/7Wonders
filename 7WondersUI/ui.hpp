@@ -155,7 +155,7 @@ private:
 signals:
 
 public slots:
-    void userMessage(const QString & message);
+    void userMessage(const QColor & color, const QString & message);
     void setPlayerId(PlayerId playerId);
     void showChoice(const Choice & choice);
     void showChoiceFace(WonderId wonderId);

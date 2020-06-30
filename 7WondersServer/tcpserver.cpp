@@ -73,18 +73,27 @@ void TcpServer::gameOver() {
 }
 
 
-void TcpServer::sendMessage(const QString & message) {
-    sendAll(TcpCommon::encodeSingle(TcpCommon::userMessage, message));
+void TcpServer::sendMessage(const QString & color, const QString & message) {
+    QStringList list;
+    list.append(color);
+    list.append(message);
+    sendAll(TcpCommon::encodeMulti(TcpCommon::userMessage, list));
 }
 
 
-void TcpServer::sendMessageToPlayer(PlayerId playerId, const QString & message) {
-    sendToPlayer(playerId, TcpCommon::encodeSingle(TcpCommon::userMessage, message));
+void TcpServer::sendMessageToPlayer(PlayerId playerId, const QString & color, const QString & message) {
+    QStringList list;
+    list.append(color);
+    list.append(message);
+    sendToPlayer(playerId, TcpCommon::encodeMulti(TcpCommon::userMessage, list));
 }
 
 
-void TcpServer::sendMessageNotToPlayer(PlayerId playerId, const QString & message) {
-    const QString & str = TcpCommon::encodeSingle(TcpCommon::userMessage, message);
+void TcpServer::sendMessageNotToPlayer(PlayerId playerId, const QString & color, const QString & message) {
+    QStringList list;
+    list.append(color);
+    list.append(message);
+    const QString & str = TcpCommon::encodeMulti(TcpCommon::userMessage, list);
     for (const PlayerSocket & ps : playerSockets) {
         if (ps.playerId != playerId) {
             sendToPlayer(ps.playerId, str);

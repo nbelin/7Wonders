@@ -29,9 +29,9 @@ public:
     void showCardsToPlay(PlayerId playerId, int possibleActions, const QVector<CardId> & cards);
     void confirmAction(PlayerId playerId, bool valid, const QString & optMessage = QString());
     void gameOver();
-    void sendMessage(const QString & message);
-    void sendMessageToPlayer(PlayerId playerId, const QString & message);
-    void sendMessageNotToPlayer(PlayerId playerId, const QString & message);
+    void sendMessage(const QString & color, const QString & message);
+    void sendMessageToPlayer(PlayerId playerId, const QString & color, const QString & message);
+    void sendMessageNotToPlayer(PlayerId playerId, const QString & color, const QString & message);
 
 signals:
     void addPlayerName(const QTcpSocket * socket, const char * name);

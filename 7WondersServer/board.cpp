@@ -372,8 +372,8 @@ void Board::gameProcess() {
                     return;
                 }
                 player->showBoard();
-                tcpserver.sendMessageToPlayer(player->view.id, "Choose a discarded card to play for free");
-                tcpserver.sendMessageNotToPlayer(player->view.id, "A player is choosing a discarded card");
+                tcpserver.sendMessageToPlayer(player->view.id, "darkCyan", "Choose a discarded card to play for free");
+                tcpserver.sendMessageNotToPlayer(player->view.id, "darkCyan", "A player is choosing a discarded card");
                 player->play({playDiscarded}, state.discardedCards);
                 return;
             }
@@ -389,8 +389,8 @@ void Board::gameProcess() {
                 }
                 if (!neirbyGuilds.empty()) {
                     player->showBoard();
-                    tcpserver.sendMessageToPlayer(player->view.id, "Choose a guild to copy from neirby guilds");
-                    tcpserver.sendMessageNotToPlayer(player->view.id, "A player is choosing a neirby guild to copy");
+                    tcpserver.sendMessageToPlayer(player->view.id, "darkMagenta", "Choose a guild to copy from neirby guilds");
+                    tcpserver.sendMessageNotToPlayer(player->view.id, "darkMagenta", "A player is choosing a neirby guild to copy");
                     player->play({copyGuild}, neirbyGuilds);
                     return;
                 }
@@ -844,8 +844,8 @@ void Board::showChoice() {
 
 
 void Board::sendWaitingPlayerMessage(PlayerId playerId) {
-    tcpserver.sendMessageToPlayer(playerId, "Hey! We are waiting for you ;)");
-    tcpserver.sendMessageNotToPlayer(playerId, getPlayer(playerId)->view.name + " is still playing...");
+    tcpserver.sendMessageToPlayer(playerId, "darkGray", "Hey! We are waiting for you ;)");
+    tcpserver.sendMessageNotToPlayer(playerId, "darkGray", getPlayer(playerId)->view.name + " is still playing...");
 }
 
 

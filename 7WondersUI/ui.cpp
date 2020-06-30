@@ -445,13 +445,19 @@ void UI::setBackground(int alpha) {
 }
 
 
-void UI::userMessage(const QString & message) {
+void UI::userMessage(const QColor & color, const QString & message) {
     //QMessageBox::information(this, "Info", message);
 
-    messageText->setGeometry(size().width()/5, size().height()/5, 0, 0);
+    messageText->setGeometry(size().width()/3, size().height()/3, 0, 0);
     messageText->setPlainText(message);
     messageText->document()->adjustSize();
     messageText->setFixedSize(messageText->document()->size().toSize() + QSize(15, 5));
+    QPalette palette;
+    QColor colorAlpha(color);
+    colorAlpha.setAlpha(180);
+    palette.setColor(QPalette::Base, colorAlpha);
+    palette.setColor(QPalette::Text, Qt::white);
+    messageText->setPalette(palette);
 
     messageText->show();
     QTimer::singleShot(4000, messageText, &QWidget::hide);
@@ -591,7 +597,7 @@ void UI::confirmAction(bool valid, const QString & optMessage) {
             rightResourcesBought[i].value = 0;
         }
     } else {
-        userMessage(QString("Invalid action: ") + optMessage);
+        userMessage(Qt::darkRed, QString("Invalid action: ") + optMessage);
     }
     update();
 }
@@ -1547,7 +1553,7 @@ void UI::keyPressEvent(QKeyEvent * event) {
     }
     QFile(path).copy(tmpPath);
     if (! QDesktopServices::openUrl(tmpPath)) {
-        userMessage(QString("Error opening file: ") + tmpPath);
+        userMessage(Qt::red, QString("Error opening file: ") + tmpPath);
     }
 }
 

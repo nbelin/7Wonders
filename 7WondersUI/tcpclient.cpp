@@ -35,7 +35,7 @@ void TcpClient::socketStateChanged(QAbstractSocket::SocketState socketState)
 {
     std::cout << "state changed: " << socketState << std::endl;
     if (socketState == QAbstractSocket::UnconnectedState) {
-        userMessage("Server disconnected");
+        userMessage(Qt::darkYellow, "Server disconnected");
     }
 }
 
@@ -225,8 +225,10 @@ void TcpClient::parseGameOver(const QStringList & args) {
 
 
 void TcpClient::parseUserMessage(const QStringList & args) {
-    if (args.size() != 1) {
+    if (args.size() < 2) {
         return;
     }
-    userMessage(args[0]);
+    QStringList list(args);
+    list.removeFirst();
+    userMessage(QColor(args[0]), list.join(TcpCommon::separator));
 }

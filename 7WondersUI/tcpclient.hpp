@@ -5,6 +5,7 @@
 #include <QString>
 #include <QTcpSocket>
 #include <QStringList>
+#include <QColor>
 
 #include "card.hpp"
 #include "playerview.hpp"
@@ -43,7 +44,7 @@ signals:
     void showCardsToPlay(int possibleActions, const QVector<CardId> & cards);
     void confirmAction(bool valid, const QString & optMessage);
     void gameOver();
-    void userMessage(const QString & message);
+    void userMessage(const QColor & color, const QString & message);
 
 public slots:
     void socketStateChanged(QAbstractSocket::SocketState socketState);
