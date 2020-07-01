@@ -117,8 +117,14 @@ void TcpServer::socketStateChanged(QAbstractSocket::SocketState socketState)
 {
     if (socketState == QAbstractSocket::UnconnectedState)
     {
-        //QTcpSocket * sender = static_cast<QTcpSocket*>(QObject::sender());
-        //playerSockets.removeOne(getPlayerSocket(sender));
+        QTcpSocket * sender = static_cast<QTcpSocket*>(QObject::sender());
+        PlayerSocket ps = getPlayerSocket(sender);
+        playerSockets.removeOne(ps);
+        if (playerSockets.empty()) {
+            std::cout << "No more active connexion" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        sendMessage(Colors::black, QString::number(ps.playerId) + " disconnected");
     }
 }
 
@@ -296,8 +302,6 @@ void TcpServer::parseRandomPlaces(const QTcpSocket * socket, const QStringList &
     }
     setRandomPlaces(args[0].toInt());
 }
-
-
 
 
 void TcpServer::parseAskGameStarts(const QTcpSocket * socket, const QStringList & args) {
