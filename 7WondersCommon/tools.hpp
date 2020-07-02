@@ -20,23 +20,23 @@ namespace Tools {
 
 // avoid to include Qt GUI module just to have color names
 namespace Colors {
-    const char * white = "white";
-    const char * black = "black";
-    const char * cyan = "cyan";
-    const char * darkCyan = "darkCyan";
-    const char * red = "red";
-    const char * darkRed = "darkRed";
-    const char * magenta = "magenta";
-    const char * darkMagenta = "darkMagenta";
-    const char * green = "green";
-    const char * darkGreen = "darkGreen";
-    const char * yellow = "yellow";
-    const char * darkYellow = "darkYellow";
-    const char * blue = "blue";
-    const char * darkBlue = "darkBlue";
-    const char * gray = "gray";
-    const char * darkGray = "darkGray";
-    const char * lightGray = "lightGray";
+    extern const char * white;
+    extern const char * black;
+    extern const char * cyan;
+    extern const char * darkCyan;
+    extern const char * red;
+    extern const char * darkRed;
+    extern const char * magenta;
+    extern const char * darkMagenta;
+    extern const char * green;
+    extern const char * darkGreen;
+    extern const char * yellow;
+    extern const char * darkYellow;
+    extern const char * blue;
+    extern const char * darkBlue;
+    extern const char * gray;
+    extern const char * darkGray;
+    extern const char * lightGray;
 }
 
 #endif // TOOLS_HPP

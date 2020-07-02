@@ -55,6 +55,7 @@ public slots:
 private:
     struct PlayerSocket {
         PlayerSocket(QTcpSocket * _socket) { socket = _socket; playerId = -1; }
+        bool operator == (const PlayerSocket & other) const { return socket == other.socket; }
 
         QTcpSocket * socket;
         PlayerId playerId;
