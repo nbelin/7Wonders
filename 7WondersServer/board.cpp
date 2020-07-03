@@ -494,7 +494,7 @@ bool Board::isValidAction(PlayerId playerId, const Action & action, QString & op
     }
 
     Resource costResources;
-    Currency costCoins;
+    Currency costCoins = 0;
     if (action.type == playCard) {
         if (player->view.playedCards.contains(action.card)) {
             optMessage = "Card already played";

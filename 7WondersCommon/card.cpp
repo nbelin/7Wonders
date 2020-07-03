@@ -15,6 +15,7 @@ const char * CardTypeToStr(CardType type) {
     case TypeMilitaryDefeat:return "MilitaryDefeat";
     case TypeNone:          return "NONE TYPE";
     }
+    return "ERROR TYPE";
 }
 
 
@@ -31,6 +32,7 @@ const char * CardTypeToShortStr(CardType type) {
     case TypeMilitaryDefeat:return "Defeat";
     case TypeNone:          return "NONE";
     }
+    return "ERROR";
 }
 
 
@@ -173,6 +175,9 @@ QString Card::getShortText() const {
         break;
     case TypeScience:
         retStr = ScienceTypeToShortStr(science);
+        break;
+    case TypeMilitaryDefeat:
+        retStr = "M/Defeat";
         break;
     }
     return retStr;

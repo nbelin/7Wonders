@@ -1461,6 +1461,7 @@ QPushButton * UI::getButtonFromAction(ActionType type) {
     case copyGuild:
         return buttonCopyGuild;
     }
+    return nullptr;
 }
 
 
@@ -1681,11 +1682,15 @@ void UI::buttonCreateGamePressed() {
 #ifdef __linux__
     QString serverExePath = Tools::createPath({"7WondersServer", "7WondersServer"});
 #else
+#ifdef QT_NO_DEBUG
+    QString serverExePath = Tools::createPath({"..", "7WondersServer", "release", "7WondersServer"});
+#else
     QString serverExePath = Tools::createPath({"..", "7WondersServer", "debug", "7WondersServer"});
+#endif
 #endif
     std::cout << "server path: " << serverExePath.toStdString() << std::endl;
     serverProcess = new QProcess(this);
-    serverProcess->start(serverExePath);
+    serverProcess->start(serverExePath, QStringList());
     QThread::msleep(200);
     if (! tcpclient.connectServer("127.0.0.1")) {
         QMessageBox::critical(this, "Error", QString("Error connecting to local server\n" + tcpclient.lastError()));

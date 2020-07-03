@@ -11,7 +11,7 @@ QStringList TcpCommon::decodeMessages(const QString & data) {
         return result;
     }
     QStringList messages = data.split(start);
-    for (size_t i=1; i<messages.size(); ++i) { // first split is empty
+    for (int i=1; i<messages.size(); ++i) { // first split is empty
         const QString & str = messages[i];
         if (! str.endsWith(end)) {
             std::cout << "ERROR MESSAGE DOES NOT END WITH " << end << std::endl;

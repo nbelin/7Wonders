@@ -14,6 +14,9 @@ const QVector<CardId> & Wonder::getStages(WonderFace wonderFace) const {
         return stagesA;
     case WonderFaceB:
         return stagesB;
+    case WonderFaceInvalid:
+        std::cout << "ERROR invalid face" << std::endl;
+        return stagesA;
     }
     return stagesA;
 }
@@ -25,6 +28,9 @@ const QString & Wonder::getImageFace(WonderFace wonderFace) const {
         return imageA;
     case WonderFaceB:
         return imageB;
+    case WonderFaceInvalid:
+        std::cout << "ERROR invalid face" << std::endl;
+        return image;
     }
     return image;
 }
