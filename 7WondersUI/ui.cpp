@@ -1780,15 +1780,18 @@ void UI::randomPlacesChanged(int state) {
 
 void UI::selectFaceRandomPressed() {
     tcpclient.selectFace(WonderFaceInvalid);
+    prepareGame();
 }
 
 
 void UI::selectFaceAPressed() {
     tcpclient.selectFace(WonderFaceA);
+    prepareGame();
 }
 
 
 void UI::selectFaceBPressed() {
     tcpclient.selectFace(WonderFaceB);
+    prepareGame();
 }
 
