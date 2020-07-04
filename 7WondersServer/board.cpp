@@ -1035,9 +1035,10 @@ QVector<CardId> Board::getRandomGuilds() {
 
 
 QVector<CardId> & Board::getCardsByAgeRoundPlayer(Age a, int round, PlayerId p) {
-    int arrayId = (getPlayerArrayId(p) + round) % state.nbPlayers;
+    // make sure number is positive before modulo
+    int arrayId = (getPlayerArrayId(p) - round + 10 * state.nbPlayers) % state.nbPlayers;
     if (a == 2) {
-        arrayId = (getPlayerArrayId(p) - round + state.nbPlayers) % state.nbPlayers;
+        arrayId = (getPlayerArrayId(p) + round) % state.nbPlayers;
     }
     //std::cout << "getCardsByAgeRoundPlayer " << (int)a << " " << round << " " << p << "(" << arrayId << ")" << std::endl;
     return state.remainingCards[a-1][arrayId];
