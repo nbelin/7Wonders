@@ -141,5 +141,8 @@
         <file>images/cards/workshop-EN.png</file>
         <file>images/icon.png</file>
         <file>images/tokens/win-1.back.png</file>
+        <file>images/tokens/rotate1.png</file>
+        <file>images/tokens/rotate2.png</file>
+        <file>images/tokens/rotate3.png</file>
     </qresource>
 </RCC>

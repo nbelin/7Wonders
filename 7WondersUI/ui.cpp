@@ -413,7 +413,7 @@ void UI::prepareGame() {
     gameView->show();
     gameView->setMouseTracking(true);
     setMouseTracking(true);
-    backgroundAlpha = 140;
+    backgroundAlpha = 120;
 }
 
 
@@ -709,7 +709,7 @@ void UI::showCentral() {
     int buttonsHeight = area.height() * menuHeightCoef;
     int nonButtonsHeight = area.height() - buttonsHeight;
     QRect buttonsArea(cardsToPlayArea.right(), area.bottom() - area.height() * menuHeightCoef, buttonsWidth, buttonsHeight);
-    QRect discardedArea(cardsToPlayArea.right(), area.top(), buyLeftArea.left() - cardsToPlayArea.right(), nonButtonsHeight);
+    QRect discardedArea(cardsToPlayArea.right(), area.top(), buyRightArea.left() - cardsToPlayArea.right(), nonButtonsHeight);
 
     buyLeftArea = takeMarginFromRect(buyLeftArea, 2.0);
     buyRightArea = takeMarginFromRect(buyRightArea, 2.0);
@@ -768,6 +768,13 @@ void UI::showCentral() {
         int y = discardedArea.top() + discardedStep * i;
         painter.drawPixmap(x, y, discardedWidth, discardedHeight, image);
     }
+
+
+    // draw rotation
+    QImage imageRotate = QImage(Tools::imageTokenPath("rotate" + QString::number(board.currentAge) + ".png"));
+    imageRotate.invertPixels();
+    QRect rotateArea = takeMarginFromRect(discardedArea, 15);
+    painter.drawImage(rotateArea.topLeft(), imageRotate.scaled(rotateArea.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 
     showCard(focusedCard, focusedCardArea, 0);
