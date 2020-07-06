@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += testlib
-QT       += core widgets
+QT       += core widgets network
 QT       -= gui
 
 TARGET = tst_tests
@@ -24,8 +24,11 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../7WondersCommon/d
 else:unix: LIBS += -L$$OUT_PWD/../7WondersCommon/ -l7WondersCommon
 
 INCLUDEPATH += $$PWD/../7WondersCommon
-INCLUDEPATH += $$PWD/../7WondersUI
-INCLUDEPATH += $$PWD/../7WondersServer
 DEPENDPATH += $$PWD/../7WondersCommon
-DEPENDPATH += $$PWD/../7WondersUI
-DEPENDPATH += $$PWD/../7WondersServer
+
+#win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../7WondersServer/release/ -l7WondersServer
+#else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../7WondersServer/debug/ -l7WondersServer
+#else:unix: LIBS += -L$$OUT_PWD/../7WondersServer/ -l7WondersServer
+
+#INCLUDEPATH += $$PWD/../7WondersServer
+#DEPENDPATH += $$PWD/../7WondersServer

@@ -8,6 +8,8 @@
 #include "playerview.hpp"
 #include "boardview.hpp"
 #include "resourceproduction.hpp"
+//#include "board.hpp"
+//#include "ai.hpp"
 
 
 class Tests : public QObject
@@ -23,6 +25,7 @@ private Q_SLOTS:
     void testCountPoints();
     void testPlayerView();
     void testBoardView();
+    void testFullGame();
 };
 
 
@@ -189,7 +192,40 @@ void Tests::testBoardView() {
     bv.players.clear();
     bv.players.append(pv);
     QVERIFY(bv.countSciencePoints(1) == 18);
+}
 
+
+void Tests::testFullGame() {
+    /*
+    Board board;
+    QVector<AI *> listAIs;
+    listAIs.append(new AI(&board, "AI 0"));
+    listAIs.append(new AI(&board, "AI 1"));
+    listAIs.append(new AI(&board, "AI 2"));
+    listAIs.append(new AI(&board, "AI 3"));
+    listAIs.append(new AI(&board, "AI 4"));
+    listAIs.append(new AI(&board, "AI 5"));
+    listAIs.append(new AI(&board, "AI 6"));
+    board.askStartGame();
+    while (board.state.status != Board::StatusGameOver) {
+        QThread::msleep(100);
+        QCoreApplication::processEvents();
+    }
+
+    BoardView bv = board.toBoardView();
+    int minScore = 999;
+    int maxScore = 0;
+    for (const AI * ai : listAIs) {
+        int score = bv.countPoints(ai->view.id);
+        qDebug() << ai->view.name << " score: " << score;
+        minScore = qMin(minScore, score);
+        maxScore = qMax(maxScore, score);
+    }
+    qDebug() << "minScore: " << minScore;
+    qDebug() << "maxScore: " << maxScore;
+    QVERIFY(minScore > 25);
+    QVERIFY(maxScore > 45);
+    */
 }
 
 

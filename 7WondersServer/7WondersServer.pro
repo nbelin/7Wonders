@@ -7,6 +7,8 @@ CONFIG -= app_bundle
 CONFIG += c++11
 
 TEMPLATE = app
+#TEMPLATE = lib
+#win32:CONFIG += staticlib
 
 SOURCES += main.cpp \
     board.cpp \
