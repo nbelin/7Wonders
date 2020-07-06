@@ -206,7 +206,7 @@ double Player::evaluateScore() const {
     if (canPlayCardFromDiscarded) {
         points += board->isLastRound() * 1.5;
         points += board->state.currentAge;
-        points += board->state.discardedCards.size() * 0.1;
+        points += board->state.discardedCards.size() * 0.15;
     }
 
 
