@@ -101,7 +101,7 @@ void Player::addPlayedAction(const Action & action) {
 }
 
 
-double Player::evaluateScore() {
+double Player::evaluateScore() const {
     BoardView bv = board->toBoardView();
     double points = bv.countPoints(view.id);
 
@@ -152,8 +152,12 @@ double Player::evaluateScore() {
 
 
     // economy
-    points += production.evaluateScore();
-    if (! board->isLastAge()) {
+    if (board->isLastAge()) {
+        if (! board->isLastRound()) {
+            points += production.evaluateScore() / 10.0;
+        }
+    } else {
+        points += production.evaluateScore();
         Currency usefulNbCoins = view.coins;
         if (usefulNbCoins > 8) {
             // stop giving more points if AI has already too much coins

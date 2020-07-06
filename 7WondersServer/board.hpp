@@ -69,7 +69,7 @@ public:
     TcpServer & getServer() { return tcpserver; }
     bool isValidAction(PlayerId playerId, const Action & action, QString & optMessage, QVector<Resource> * listMissing = nullptr);
     bool isNewAge() const;
-    BoardView toBoardView();
+    BoardView toBoardView() const;
     BoardState saveBoardState() const;
     void restoreFakeBoardState(const BoardState & state);
     void playSingleAction(PlayerId playerId, Action & action);

@@ -41,7 +41,7 @@ public:
     virtual void playImplem(const QVector<ActionType> & possibleActions, const QVector<CardId> & cards) = 0;
     virtual void showBoard() = 0;
     void addPlayedAction(const Action & action);
-    double evaluateScore();
+    double evaluateScore() const;
 
     Board * board;
     PlayerView view;

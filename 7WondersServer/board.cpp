@@ -849,7 +849,7 @@ void Board::sendWaitingPlayerMessage(PlayerId playerId) {
 }
 
 
-BoardView Board::toBoardView() {
+BoardView Board::toBoardView() const {
     BoardView bv;
 
     for (Player * player : state.players) {
