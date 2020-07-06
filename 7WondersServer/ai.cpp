@@ -39,6 +39,7 @@ void AI::playImplem(const QVector<ActionType> & possibleActions, const QVector<C
     buyable.addResourceProduction(buyableRight);
 
     Board::BoardState state = board->saveBoardState();
+    std::cout << "current score: " << board->getPlayer(view.id)->evaluateScore() << std::endl;
 
     Action action;
     for ( ActionType type : possibleActions ) {

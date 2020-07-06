@@ -49,7 +49,7 @@ Board::Board(QObject *parent, bool fake) : QObject(parent), tcpserver(this) {
 
     timer = new QTimer(this);
     QObject::connect(timer, &QTimer::timeout, this, &Board::gameProcess);
-    timer->start(500);
+    timer->start(50);
 
     waitingPlayerTimer = new QTimer(this);
 }
@@ -895,6 +895,7 @@ void Board::restoreFakeBoardState(const Board::BoardState & state_) {
 
 void Board::playSingleAction(PlayerId playerId, Action & action) {
     Player * player = getPlayer(playerId);
+    player->newRound();
     player->addPlayedAction(action);
     commitActionPart1(playerId, 0);
     commitActionPart2(playerId, 0);
