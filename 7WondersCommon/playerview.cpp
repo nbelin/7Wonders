@@ -15,7 +15,6 @@ PlayerView::PlayerView()
 
 
 QString PlayerView::toString() const {
-    QString res;
     QStringList list;
     list.append(QString::number(id));
     list.append(name);
@@ -42,8 +41,12 @@ QString PlayerView::toString() const {
         listActions.append(action.toString());
     }
     list.append(listActions.join(subSep));
-    res = list.join(sep);
-    return res;
+    QStringList listTimes;
+    for ( int time : playTimesMs ) {
+        listTimes.append(QString::number(time));
+    }
+    list.append(listTimes.join(subSep));
+    return list.join(sep);
 }
 
 
@@ -71,6 +74,10 @@ void PlayerView::fromString(const QString & str) {
         Action tmpAction;
         tmpAction.fromString(strAction);
         lastPlayedActions.append(tmpAction);
+    }
+    playTimesMs.clear();
+    for ( const QString & strTime : Tools::mySplit(list[9], subSep) ) {
+        playTimesMs.append(strTime.toInt());
     }
 }
 

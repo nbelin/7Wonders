@@ -856,6 +856,7 @@ void UI::showPlayerPoints(const QRect & area, PlayerId playerId, bool header) {
     QString guip;
     QString scip;
     QString totp;
+    QString time;
 
     if (header) {
         x = xLarge;
@@ -870,17 +871,21 @@ void UI::showPlayerPoints(const QRect & area, PlayerId playerId, bool header) {
         guip = "Guild";
         scip = "Science";
         totp = "Total";
+        time = "Time (s)";
     } else {
-        name1 = AllWonders::getWonder(board.getPlayer(playerId).wonderId).name;
-        name2 = board.getPlayer(playerId).name;
-        milp = QString::number(board.countMilitaryPoints(playerId));
-        monp = QString::number(board.countMoneyPoints(playerId));
-        wonp = QString::number(board.countWonderPoints(playerId));
-        civp = QString::number(board.countCivilisationPoints(playerId));
-        comp = QString::number(board.countCommercePoints(playerId));
-        guip = QString::number(board.countGuildPoints(playerId));
-        scip = QString::number(board.countSciencePoints(playerId));
-        totp = QString::number(board.countPoints(playerId));
+        const PlayerView & player = board.getPlayer(playerId);
+        name1 = AllWonders::getWonder(player.wonderId).name;
+        name2 = player.name;
+        milp = QString::number(board.countMilitaryPoints(playerId)).rightJustified(3);
+        monp = QString::number(board.countMoneyPoints(playerId)).rightJustified(3);
+        wonp = QString::number(board.countWonderPoints(playerId)).rightJustified(3);
+        civp = QString::number(board.countCivilisationPoints(playerId)).rightJustified(3);
+        comp = QString::number(board.countCommercePoints(playerId)).rightJustified(3);
+        guip = QString::number(board.countGuildPoints(playerId)).rightJustified(3);
+        scip = QString::number(board.countSciencePoints(playerId)).rightJustified(3);
+        totp = QString::number(board.countPoints(playerId)).rightJustified(3);
+        double meanTimeMs = std::accumulate(player.playTimesMs.begin(), player.playTimesMs.end(), 0.0) / player.playTimesMs.size();
+        time = QString::number(meanTimeMs / 1.000, 'f', 2);
     }
 
     QPainter painter(this);
@@ -914,6 +919,10 @@ void UI::showPlayerPoints(const QRect & area, PlayerId playerId, bool header) {
 
     painter.setPen(Qt::black);
     painter.drawText(x, marginArea.top() + 9 * partHeight, totp);
+
+    painter.setFont(QFont("Arial", fontSize * 0.6));
+    painter.setPen(Qt::darkGray);
+    painter.drawText(x, marginArea.top() + 10 * partHeight, time);
 }
 
 

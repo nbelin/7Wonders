@@ -28,6 +28,7 @@ struct PlayerView {
     QVector<CardId> playedCards;
     QVector<MilitaryPoints> militaryPoints;
     QVector<Action> lastPlayedActions;
+    QVector<int> playTimesMs;
 
 private:
     static constexpr const char * sep = "~";
