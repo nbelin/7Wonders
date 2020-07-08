@@ -64,6 +64,7 @@ void Player::play(const QVector<ActionType> & possibleActions, const QVector<Car
     }
 
     status = StatusPlaying;
+    lastPlayStart.start();
 
     if (possibleActions.empty()) {
         QVector<ActionType> tmpActions;
@@ -77,8 +78,6 @@ void Player::play(const QVector<ActionType> & possibleActions, const QVector<Car
     } else {
         playImplem(possibleActions, cards);
     }
-
-    lastPlayStart.start();
 }
 
 

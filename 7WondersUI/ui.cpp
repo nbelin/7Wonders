@@ -885,7 +885,7 @@ void UI::showPlayerPoints(const QRect & area, PlayerId playerId, bool header) {
         scip = QString::number(board.countSciencePoints(playerId)).rightJustified(3);
         totp = QString::number(board.countPoints(playerId)).rightJustified(3);
         double meanTimeMs = std::accumulate(player.playTimesMs.begin(), player.playTimesMs.end(), 0.0) / player.playTimesMs.size();
-        time = QString::number(meanTimeMs / 1.000, 'f', 2);
+        time = QString::number(meanTimeMs / 1000.0, 'f', 1);
     }
 
     QPainter painter(this);
@@ -920,7 +920,7 @@ void UI::showPlayerPoints(const QRect & area, PlayerId playerId, bool header) {
     painter.setPen(Qt::black);
     painter.drawText(x, marginArea.top() + 9 * partHeight, totp);
 
-    painter.setFont(QFont("Arial", fontSize * 0.6));
+    painter.setFont(QFont("Arial", fontSize * 0.8));
     painter.setPen(Qt::darkGray);
     painter.drawText(x, marginArea.top() + 10 * partHeight, time);
 }
