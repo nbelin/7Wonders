@@ -921,7 +921,7 @@ void UI::showPlayerPoints(const QRect & area, PlayerId playerId, bool header) {
     painter.drawText(x, marginArea.top() + 9 * partHeight, totp);
 
     painter.setFont(QFont("Arial", fontSize * 0.8));
-    painter.setPen(Qt::darkGray);
+    painter.setPen(Qt::darkBlue);
     painter.drawText(x, marginArea.top() + 10 * partHeight, time);
 }
 
