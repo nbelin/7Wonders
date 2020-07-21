@@ -64,6 +64,7 @@ void Player::play(const QVector<ActionType> & possibleActions, const QVector<Car
     }
 
     status = StatusPlaying;
+    lastPlayStart.start();
 
     if (possibleActions.empty()) {
         QVector<ActionType> tmpActions;
@@ -77,13 +78,11 @@ void Player::play(const QVector<ActionType> & possibleActions, const QVector<Car
     } else {
         playImplem(possibleActions, cards);
     }
-
-    lastPlayStart.start();
 }
 
 
 void Player::addPlayedAction(const Action & action) {
-    playTimesMs.push_back(lastPlayStart.elapsed());
+    view.playTimesMs.push_back(lastPlayStart.elapsed());
     status = StatusPlayed;
     actionsToPlay.append(action);
     actionsToPlay[actionsToPlay.size() - 1].status = validated;
@@ -153,8 +152,9 @@ double Player::evaluateScore() const {
 
     // economy
     if (board->isLastAge()) {
-        if (! board->isLastRound()) {
-            points += production.evaluateScore() / 10.0;
+        if (board->nbRounds - board->state.currentRound > 3) {
+            // for example, Caravansery could gain up to (8*4)/6 = 5.3 points, or double Clay up to (8+4)/6 = 2 points
+            points += production.evaluateScore() / 6.0;
         }
     } else {
         points += production.evaluateScore();
@@ -172,7 +172,10 @@ double Player::evaluateScore() const {
             points += 3;
             break;
         case 3:
-            points += 2.25;
+            // special case for Olympia (first stage face B): does not need to play left or right trading post
+            if (i >= Resource::IdGlass || AllCards::getCard(AllWonders::getWonder(view.wonderId).getStages(view.wonderFace)[0]).target != PlayerBoth) {
+                points += 2.25;
+            }
             break;
         case 4:
             break;
@@ -185,10 +188,10 @@ double Player::evaluateScore() const {
 
     // special
     if (canPlayBothCardsAtEndOfAge) {
-        // age1: 4.5
-        // age2: 4
-        // age3: 3.5
-        points += 5 - board->state.currentAge * 0.5;
+        // age1: 7 // only beaten by resource production
+        // age2: 5.5
+        // age3: 4
+        points += 8.5 - board->state.currentAge * 1.5;
     }
 
     if (canCopyNeirbyGuild) {
@@ -196,7 +199,10 @@ double Player::evaluateScore() const {
     }
 
     if (canPlayCardForFree) {
-        points += 2.5;
+        // age1: 4.5
+        // age2: 3.5
+        // age3: 2.5
+        points += 5.5 - board->state.currentAge * 1.0;
     }
 
     if (canPlayCardForFreeAlreadyUsed) {
@@ -204,8 +210,13 @@ double Player::evaluateScore() const {
     }
 
     if (canPlayCardFromDiscarded) {
-        points += board->isLastRound() * 1.5;
-        points += board->state.currentAge;
+        //           last  (3play / 7play)
+        // age1: 0.5 (3.5)
+        // age2: 2   (5)   (+0.45 / +1.05)
+        // age3: 3.5 (6.5) (+0.90 / +2.10)
+        points -= 1;
+        points += board->isLastRound() * 3;
+        points += board->state.currentAge * 1.5;
         points += board->state.discardedCards.size() * 0.15;
     }
 
