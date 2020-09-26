@@ -1,6 +1,6 @@
 # 7Wonders
 
-C++ and Qt multiplayer implementation of 7Wonders by Antoine Bauzat.
+C++ and Qt multiplayer implementation of 7Wonders by Antoine Bauza.
 
 Tested on Windows 10 and Arch Linux (Qt 5.15.0 gcc 10.1.0 64 bits).
 
