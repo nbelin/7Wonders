@@ -14,6 +14,7 @@
 #include <QThread>
 #include <QDesktopServices>
 #include <QTimer>
+#include <QSettings>
 
 
 UI::UI(QWidget * parent) : QMainWindow(parent),
@@ -31,6 +32,7 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     }
 
     std::cout << "UI created" << std::endl;
+    LoadSettings();
 
     AllCards::init();
     AllWonders::init();
@@ -90,12 +92,18 @@ UI::UI(QWidget * parent) : QMainWindow(parent),
     if (playerName->text().length() == 0) {
         playerName->setText(qgetenv("USERNAME"));
     }
+    if (! settings.lastPlayerName.isEmpty()) {
+        playerName->setText(settings.lastPlayerName);
+    }
     playerName->setGeometry(QRect(500, 450, 150, 20));
     playerName->setFixedSize(150, 20);
     gridMenu->addWidget(playerName, 2, 1, 1, 2, Qt::AlignCenter);
 
     remoteIpAddress = new QLineEdit(menuView);
     remoteIpAddress->setPlaceholderText("remote IP address");
+    if (! settings.lastRemoteIpAddress.isEmpty()) {
+        remoteIpAddress->setText(settings.lastRemoteIpAddress);
+    }
     remoteIpAddress->setGeometry(QRect(600, 500, 150, 20));
     remoteIpAddress->setFixedSize(150, 20);
     gridMenu->addWidget(remoteIpAddress, 3, 2, Qt::AlignCenter);
@@ -419,6 +427,25 @@ void UI::prepareGame() {
 
 void UI::startGame() {
     prepareGame();
+}
+
+
+void UI::createOrJoinGame() {
+    if (playerName->text().length() == 0) {
+        QMessageBox::warning(this, "Warning", QString("Please enter a valid name"));
+        return;
+    }
+    if (! tcpclient.connectServer(remoteIpAddress->text())) {
+        QMessageBox::critical(this, "Error", QString("Error connecting to: " + remoteIpAddress->text() + "\n" + tcpclient.lastError()));
+        return;
+    }
+    tcpclient.setPlayerName(playerName->text().toStdString().c_str());
+
+    settings.lastPlayerName = playerName->text();
+    settings.lastRemoteIpAddress = remoteIpAddress->text();
+    SaveSettings();
+
+    prepareChoice();
 }
 
 
@@ -1481,6 +1508,20 @@ QPushButton * UI::getButtonFromAction(ActionType type) {
 }
 
 
+void UI::LoadSettings() {
+    QSettings set(QString("config.ini"), QSettings::IniFormat);
+    settings.lastPlayerName = set.value("last/playerName", "").toString();
+    settings.lastRemoteIpAddress = set.value("last/remoteIpAddress", "").toString();
+}
+
+
+void UI::SaveSettings() {
+    QSettings set(QString("config.ini"), QSettings::IniFormat);
+    set.setValue("last/playerName", settings.lastPlayerName);
+    set.setValue("last/remoteIpAddress", settings.lastRemoteIpAddress);
+}
+
+
 void UI::paintEvent(QPaintEvent * event) {
     //std::cout << "paintEvent called: " << event->rect().x() << " " << event->rect().y() << " " << event->rect().width() << " " << event->rect().height() << std::endl;
     (void) event;
@@ -1688,10 +1729,6 @@ void UI::buttonRightResourceResetPressed(int id) {
 
 
 void UI::buttonCreateGamePressed() {
-    if (playerName->text().length() == 0) {
-        QMessageBox::warning(this, "Warning", QString("Please enter a valid name"));
-        return;
-    }
     if (serverProcess) {
         delete serverProcess;
     }
@@ -1708,26 +1745,14 @@ void UI::buttonCreateGamePressed() {
     serverProcess = new QProcess(this);
     serverProcess->start(serverExePath, QStringList());
     QThread::msleep(200);
-    if (! tcpclient.connectServer("127.0.0.1")) {
-        QMessageBox::critical(this, "Error", QString("Error connecting to local server\n" + tcpclient.lastError()));
-        return;
-    }
-    tcpclient.setPlayerName(playerName->text().toStdString().c_str());
-    prepareChoice();
+    remoteIpAddress->setText("127.0.0.1");
+
+    createOrJoinGame();
 }
 
 
 void UI::buttonJoinGamePressed() {
-    if (playerName->text().length() == 0) {
-        QMessageBox::warning(this, "Warning", QString("Please enter a valid name"));
-        return;
-    }
-    if (! tcpclient.connectServer(remoteIpAddress->text())) {
-        QMessageBox::critical(this, "Error", QString("Error connecting to: " + remoteIpAddress->text() + "\n" + tcpclient.lastError()));
-        return;
-    }
-    tcpclient.setPlayerName(playerName->text().toStdString().c_str());
-    prepareChoice();
+    createOrJoinGame();
 }
 
 

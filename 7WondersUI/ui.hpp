@@ -36,6 +36,7 @@ public:
     void prepareChoiceFace();
     void prepareGame();
     void startGame();
+    void createOrJoinGame();
 
 private:
     struct ShowedCard {
@@ -65,6 +66,11 @@ private:
         QPushButton * down;
     };
 
+    struct Settings {
+        QString lastPlayerName;
+        QString lastRemoteIpAddress;
+    };
+
     PlayerId playerId;
     PlayerId playerIdPointOfView;
     BoardView board;
@@ -78,6 +84,7 @@ private:
     bool isGameOver;
     int backgroundAlpha;
     QString backgroundImage;
+    Settings settings;
 
     QWidget * menuView;
     QWidget * choiceView;
@@ -146,6 +153,8 @@ private:
     QRect transformPainter(QPainter & painter, const QRect & area, int rotate);
     QRect rotatedScaledRect(const QRect & parentArea, int rotate, double percentX, double percentY, double percentWidth, double percentHeight);
     QPushButton * getButtonFromAction(ActionType type);
+    void LoadSettings();
+    void SaveSettings();
 
     void paintEvent(QPaintEvent * event);
     void mousePressEvent(QMouseEvent * event);
