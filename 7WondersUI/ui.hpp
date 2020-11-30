@@ -67,6 +67,7 @@ private:
     };
 
     struct Settings {
+        PlayerId lastPlayerId;
         QString lastPlayerName;
         QString lastRemoteIpAddress;
     };

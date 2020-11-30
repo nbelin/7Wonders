@@ -63,7 +63,7 @@ public:
 
     void mainLoop();
     PlayerId addPlayer(Player * player);
-    void removePlayer(Player * player);
+    void removePlayer(PlayerId playerId);
     size_t getNbPlayers() const;
     Player * getPlayer(PlayerId playerId, size_t offset = 0) const;
     TcpServer & getServer() { return tcpserver; }
@@ -77,7 +77,8 @@ public:
 signals:
 
 public slots:
-    void addPlayerName(const QTcpSocket * socket, const char * name);
+    void addPlayerName(const QTcpSocket * socket, const char * name, PlayerId playerId);
+    void playerDisconnected(PlayerId playerId);
     void setNumberAIs(int number);
     void setPlayerReady(PlayerId playerId, bool ready);
     void askWonder(PlayerId playerId, WonderId wonderId);

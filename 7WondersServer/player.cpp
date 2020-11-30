@@ -8,6 +8,7 @@ Player::Player(Board * board, const char * name):
     board(board),
     shields(0),
     status(StatusNotReady),
+    isDisconnected(false),
     canPlayBothCardsAtEndOfAge(false),
     canCopyNeirbyGuild(false),
     canPlayCardForFree(false),
@@ -22,7 +23,7 @@ Player::Player(Board * board, const char * name):
 
 
 Player::~Player() {
-    board->removePlayer(this);
+    board->removePlayer(view.id);
 }
 
 
@@ -74,8 +75,12 @@ void Player::play(const QVector<ActionType> & possibleActions, const QVector<Car
         if (canPlayCardForFree && !canPlayCardForFreeAlreadyUsed) {
             tmpActions.append(playFreeCard);
         }
+        lastPossibleActions = tmpActions;
+        lastCards = cards;
         playImplem(tmpActions, cards);
     } else {
+        lastPossibleActions = possibleActions;
+        lastCards = cards;
         playImplem(possibleActions, cards);
     }
 }
@@ -231,3 +236,21 @@ double Player::evaluateScore() const {
 }
 
 
+void Player::resendLastView() {
+    std::cout << "resendLastView for " << view.name.toStdString() << std::endl;
+    switch (status) {
+    case StatusSelectingFace:
+        chooseFace();
+        break;
+    case StatusPlaying:
+        showBoard();
+        playImplem(lastPossibleActions, lastCards);
+        break;
+    case StatusPlayed:
+        showBoard();
+        break;
+    default:
+        // do nothing, other states handled at board level
+        break;
+    }
+}

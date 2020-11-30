@@ -93,8 +93,11 @@ void TcpClient::send(const QString & message) {
 }
 
 
-void TcpClient::setPlayerName(const char * name) {
-    send(TcpCommon::encodeSingle(TcpCommon::playerName, name));
+void TcpClient::setPlayerName(const char * name, PlayerId playerId) {
+    QStringList list;
+    list.append(QString(name));
+    list.append(QString::number(playerId));
+    send(TcpCommon::encodeMulti(TcpCommon::playerName, list));
 }
 
 

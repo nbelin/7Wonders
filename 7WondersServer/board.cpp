@@ -32,6 +32,7 @@ Board::Board(QObject *parent, bool fake) : QObject(parent), tcpserver(this) {
     random = std::default_random_engine(QTime::currentTime().msecsSinceStartOfDay());
 
     QObject::connect(&tcpserver, &TcpServer::addPlayerName, this, &Board::addPlayerName);
+    QObject::connect(&tcpserver, &TcpServer::playerDisconnected, this, &Board::playerDisconnected);
     QObject::connect(&tcpserver, &TcpServer::setNumberAIs, this, &Board::setNumberAIs);
     QObject::connect(&tcpserver, &TcpServer::setPlayerReady, this, &Board::setPlayerReady);
     QObject::connect(&tcpserver, &TcpServer::askWonder, this, &Board::askWonder);
@@ -76,14 +77,54 @@ void Board::mainLoop() {
 }
 
 
-void Board::addPlayerName(const QTcpSocket * socket, const char * name) {
+void Board::addPlayerName(const QTcpSocket * socket, const char * name, PlayerId playerId) {
     if (state.status != StatusWaitingReady) {
-        tcpserver.sendDebug("already started...");
+        Player * player = getPlayer(playerId);
+        if (! player->isDisconnected) {
+            tcpserver.sendMessage(Colors::black, QString(name) + " tried to join");
+            return;
+        }
+        player->isDisconnected = false;
+        tcpserver.setPlayerId(socket, playerId);
+        tcpserver.sendMessageToPlayer(playerId, Colors::black, "Welcome back!");
+        tcpserver.sendMessageNotToPlayer(playerId, Colors::black, QString(name) + " reconnected!");
+
+        switch (state.status) {
+        case StatusWaitingReady:
+            showChoice();
+            return;
+        case StatusWaitingFaces:
+            getPlayer(playerId)->resendLastView();
+            return;
+        case StatusGameStarted:
+            tcpserver.startGame();
+            getPlayer(playerId)->resendLastView();
+            return;
+        case StatusGameOver:
+            tcpserver.startGame();
+            tcpserver.gameOver();
+            return;
+        }
         return;
     }
 
+    // sent playerId is not taken into account if this is a new game
+
     Player * player = new Human(this, name);
     tcpserver.setPlayerId(socket, player->view.id);
+    showChoice();
+}
+
+
+void Board::playerDisconnected(PlayerId playerId) {
+    tcpserver.sendMessage(Colors::black, getPlayer(playerId)->view.name + " disconnected");
+    if (state.status != StatusWaitingReady) {
+        // do nothing if game started, we hope player will reconnect soon
+        getPlayer(playerId)->isDisconnected = true;
+        return;
+    }
+
+    removePlayer(playerId);
     showChoice();
 }
 
@@ -109,7 +150,7 @@ void Board::setNumberAIs(int number) {
             QString name = QString("[AI ") + QString::number(i) + QString("]");
             for (Player * p : state.players) {
                 if (p->view.name == name) {
-                    removePlayer(p);
+                    removePlayer(p->view.id);
                 }
             }
         }
@@ -239,9 +280,9 @@ PlayerId Board::addPlayer(Player * player) {
 }
 
 
-void Board::removePlayer(Player * player) {
+void Board::removePlayer(PlayerId playerId) {
     for (int i=0; i<state.players.size(); ++i ) {
-        if (state.players[i] == player) {
+        if (state.players[i]->view.id == playerId) {
             state.players.erase(state.players.begin()+i);
         }
     }

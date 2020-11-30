@@ -42,6 +42,7 @@ public:
     virtual void showBoard() = 0;
     void addPlayedAction(const Action & action);
     double evaluateScore() const;
+    void resendLastView();
 
     Board * board;
     PlayerView view;
@@ -53,6 +54,10 @@ public:
     StatusPlayer status;
     QVector<Action> actionsToPlay;
     QElapsedTimer lastPlayStart;
+    bool isDisconnected;
+    QVector<ActionType> lastPossibleActions;
+    QVector<CardId> lastCards;
+
 
     bool canPlayBothCardsAtEndOfAge;
     bool canCopyNeirbyGuild;

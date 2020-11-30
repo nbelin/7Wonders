@@ -439,7 +439,7 @@ void UI::createOrJoinGame() {
         QMessageBox::critical(this, "Error", QString("Error connecting to: " + remoteIpAddress->text() + "\n" + tcpclient.lastError()));
         return;
     }
-    tcpclient.setPlayerName(playerName->text().toStdString().c_str());
+    tcpclient.setPlayerName(playerName->text().toStdString().c_str(), settings.lastPlayerId);
 
     settings.lastPlayerName = playerName->text();
     settings.lastRemoteIpAddress = remoteIpAddress->text();
@@ -494,6 +494,9 @@ void UI::userMessage(const QColor & color, const QString & message) {
 void UI::setPlayerId(PlayerId playerId) {
     this->playerId = playerId;
     playerIdPointOfView = playerId;
+
+    settings.lastPlayerId = playerId;
+    SaveSettings();
 }
 
 
@@ -1510,6 +1513,7 @@ QPushButton * UI::getButtonFromAction(ActionType type) {
 
 void UI::LoadSettings() {
     QSettings set(QString("config.ini"), QSettings::IniFormat);
+    settings.lastPlayerId = set.value("last/playerId", PlayerIdInvalid).toInt();
     settings.lastPlayerName = set.value("last/playerName", "").toString();
     settings.lastRemoteIpAddress = set.value("last/remoteIpAddress", "").toString();
 }
@@ -1517,6 +1521,7 @@ void UI::LoadSettings() {
 
 void UI::SaveSettings() {
     QSettings set(QString("config.ini"), QSettings::IniFormat);
+    set.setValue("last/playerId", settings.lastPlayerId);
     set.setValue("last/playerName", settings.lastPlayerName);
     set.setValue("last/remoteIpAddress", settings.lastRemoteIpAddress);
 }

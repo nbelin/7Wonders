@@ -34,7 +34,8 @@ public:
     void sendMessageNotToPlayer(PlayerId playerId, const QString & color, const QString & message);
 
 signals:
-    void addPlayerName(const QTcpSocket * socket, const char * name);
+    void addPlayerName(const QTcpSocket * socket, const char * name, PlayerId playerId);
+    void playerDisconnected(PlayerId playerId);
     void setNumberAIs(int number);
     void setPlayerReady(PlayerId playerId, int ready);
     void askWonder(PlayerId playerId, WonderId wonderId);

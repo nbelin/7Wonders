@@ -124,7 +124,8 @@ void TcpServer::socketStateChanged(QAbstractSocket::SocketState socketState)
             std::cout << "No more active connexion" << std::endl;
             exit(EXIT_FAILURE);
         }
-        sendMessage(Colors::black, QString::number(ps.playerId) + " disconnected");
+        //sendMessage(Colors::black, QString::number(ps.playerId) + " disconnected");
+        playerDisconnected(ps.playerId);
     }
 }
 
@@ -224,11 +225,11 @@ void TcpServer::sendToPlayer(PlayerId playerId, const QString & message) {
 
 
 void TcpServer::parsePlayerName(const QTcpSocket * socket, const QStringList & args) {
-    if (args.size() != 1) {
+    if (args.size() != 2) {
         return;
     }
     //sendDebug("add player name");
-    addPlayerName(socket, args[0].toStdString().c_str());
+    addPlayerName(socket, args[0].toStdString().c_str(), args[1].toInt());
 }
 
 

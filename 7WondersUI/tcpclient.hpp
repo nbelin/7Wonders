@@ -22,7 +22,7 @@ public:
     void disconnectServer();
     QString lastError() const;
 
-    void setPlayerName(const char * name);
+    void setPlayerName(const char * name, PlayerId playerId);
     void setNumberAIs(int value);
     void setPlayerReady(bool state);
     void askWonder(WonderId wonder);
