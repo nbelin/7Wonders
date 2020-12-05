@@ -125,7 +125,9 @@ void TcpServer::socketStateChanged(QAbstractSocket::SocketState socketState)
             exit(EXIT_FAILURE);
         }
         //sendMessage(Colors::black, QString::number(ps.playerId) + " disconnected");
-        playerDisconnected(ps.playerId);
+        if (ps.playerId != PlayerIdInvalid) {
+            playerDisconnected(ps.playerId);
+        }
     }
 }
 

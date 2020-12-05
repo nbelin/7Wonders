@@ -111,7 +111,7 @@ private:
     void sendWaitingPlayerMessage(PlayerId playerId);
 
 public:
-    size_t getPlayerArrayId(PlayerId playerId) const;
+    int getPlayerArrayId(PlayerId playerId) const;
     Player * getLeftPlayer(PlayerId playerId) const;
     Player * getRightPlayer(PlayerId playerId) const;
     QVector<Player *> getApplyPlayers(PlayerId playerId, WhichPlayer which) const;

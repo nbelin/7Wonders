@@ -78,10 +78,16 @@ void Board::mainLoop() {
 
 
 void Board::addPlayerName(const QTcpSocket * socket, const char * name, PlayerId playerId) {
+    // game already exists and started: try to connect new player with already existing one
     if (state.status != StatusWaitingReady) {
+        std::cout << "player " << name << " tries to (re)connect" << std::endl;
         Player * player = getPlayer(playerId);
+        if (player == nullptr) {
+            tcpserver.sendMessage(Colors::black, QString(name) + " tried to join, but was not connected when game started");
+            return;
+        }
         if (! player->isDisconnected) {
-            tcpserver.sendMessage(Colors::black, QString(name) + " tried to join");
+            tcpserver.sendMessage(Colors::black, QString(name) + " tried to join, but is already connected");
             return;
         }
         player->isDisconnected = false;
@@ -94,14 +100,15 @@ void Board::addPlayerName(const QTcpSocket * socket, const char * name, PlayerId
             showChoice();
             return;
         case StatusWaitingFaces:
-            getPlayer(playerId)->resendLastView();
+            player->resendLastView();
             return;
         case StatusGameStarted:
             tcpserver.startGame();
-            getPlayer(playerId)->resendLastView();
+            player->resendLastView();
             return;
         case StatusGameOver:
             tcpserver.startGame();
+            player->showBoard();
             tcpserver.gameOver();
             return;
         }
@@ -357,6 +364,9 @@ size_t Board::getNbPlayers() const {
 
 Player * Board::getPlayer(PlayerId playerId, size_t offset) const {
     int playerPos = getPlayerArrayId(playerId);
+    if (playerPos < 0) {
+        return nullptr;
+    }
     return state.players[(playerPos + offset) % state.nbPlayers];
 }
 
@@ -987,27 +997,33 @@ void Board::initAllCards() {
 }
 
 
-size_t Board::getPlayerArrayId(PlayerId playerId) const {
+int Board::getPlayerArrayId(PlayerId playerId) const {
     for (int i=0; i<state.nbPlayers; ++i) {
         if (state.players[i]->view.id == playerId) {
             return i;
         }
     }
-    std::cout << "ERROR player id" << std::endl;
-    return 0;
+    std::cout << "ERROR player id: " << playerId << std::endl;
+    return -1;
 }
 
 
 Player * Board::getLeftPlayer(PlayerId playerId) const {
-    size_t arrayId = getPlayerArrayId(playerId);
-    size_t newId = (arrayId + 1) % state.nbPlayers;
+    int arrayId = getPlayerArrayId(playerId);
+    if (arrayId < 0) {
+        return nullptr;
+    }
+    int newId = (arrayId + 1) % state.nbPlayers;
     return state.players[newId];
 }
 
 
 Player * Board::getRightPlayer(PlayerId playerId) const {
-    size_t arrayId = getPlayerArrayId(playerId);
-    size_t newId = (arrayId + state.nbPlayers - 1) % state.nbPlayers;
+    int arrayId = getPlayerArrayId(playerId);
+    if (arrayId < 0) {
+        return nullptr;
+    }
+    int newId = (arrayId + state.nbPlayers - 1) % state.nbPlayers;
     return state.players[newId];
 }
 
